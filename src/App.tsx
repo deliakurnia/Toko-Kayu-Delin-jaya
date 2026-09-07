@@ -24,6 +24,7 @@ import { RegisterPage } from './components/RegisterPage';
 import { OwnerAuthGate } from './components/OwnerAuthGate';
 import { UserAuthModal } from './components/UserAuthModal';
 import { SavedItemsModal } from './components/SavedItemsModal';
+import { CommandBarModal } from './components/CommandBarModal';
 import { BackupManager } from './components/BackupManager';
 import { ApiDocsGuide } from './components/ApiDocsGuide';
 import { NotificationCenter } from './components/NotificationCenter';
@@ -89,6 +90,19 @@ export default function App() {
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>(() => dbService.getSavedItems());
   const [isSavedItemsOpen, setIsSavedItemsOpen] = useState<boolean>(false);
+  const [isCommandBarOpen, setIsCommandBarOpen] = useState<boolean>(false);
+
+  // Global Keyboard Shortcut: Ctrl+K / Cmd+K to toggle Command Bar
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandBarOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Selection states for cross-component workflows
   const [selectedWoodFor3D, setSelectedWoodFor3D] = useState<WoodType | null>(null);
@@ -321,6 +335,7 @@ export default function App() {
           onLogoutOwner={handleLogoutOwner}
           isDarkMode={isDarkMode}
           onToggleDarkMode={handleToggleTheme}
+          onOpenCommandBar={() => setIsCommandBarOpen(true)}
         />
       ) : (
         <Navbar
@@ -337,6 +352,7 @@ export default function App() {
           isOwnerAuth={isOwnerAuth}
           savedItemsCount={savedItems.length}
           onOpenSavedItems={() => setIsSavedItemsOpen(true)}
+          onOpenCommandBar={() => setIsCommandBarOpen(true)}
         />
       )}
 
@@ -674,6 +690,25 @@ export default function App() {
         isOpen={isUserAuthModalOpen}
         onClose={() => setIsUserAuthModalOpen(false)}
         onSuccess={handleAuthSuccess}
+      />
+
+      {/* Command Palette Spotlight (Ctrl + K) */}
+      <CommandBarModal
+        isOpen={isCommandBarOpen}
+        onClose={() => setIsCommandBarOpen(false)}
+        onSelectTab={(tab) => {
+          handleTabChange(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        woods={woods}
+        onSelectWood={(wood) => {
+          setActiveTab('woods');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        isOwnerAuth={isOwnerAuth}
+        currentUser={currentUser}
+        onOpenSavedItems={() => setIsSavedItemsOpen(true)}
+        onOpenAuthModal={() => setIsUserAuthModalOpen(true)}
       />
 
       {/* Saved Items / Wishlist Modal */}
