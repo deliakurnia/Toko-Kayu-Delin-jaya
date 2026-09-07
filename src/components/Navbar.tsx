@@ -114,15 +114,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="hidden sm:block">
               <div className="flex items-center gap-2">
                 <span className="font-serif text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-stone-100">
-                  Toko Delin Jaya
+                  Kayu Nusantara
                 </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                   <ShieldCheck className="w-3 h-3" />
                   SVLK Legal
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-stone-400">
-                Kayu untuk Setiap Kebutuhan Anda • Gunungkidul, DIY
+                Bengkel Pengadaan Kayu &amp; Mebel Kustom • Delin Jaya
               </p>
             </div>
           </div>
