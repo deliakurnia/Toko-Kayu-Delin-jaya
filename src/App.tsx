@@ -19,6 +19,8 @@ import { FurnitureCatalog } from './components/FurnitureCatalog';
 import { OrderForm } from './components/OrderForm';
 import { OwnerDashboard } from './components/OwnerDashboard';
 import { UserDashboard } from './components/UserDashboard';
+import { LoginPage } from './components/LoginPage';
+import { RegisterPage } from './components/RegisterPage';
 import { OwnerAuthGate } from './components/OwnerAuthGate';
 import { UserAuthModal } from './components/UserAuthModal';
 import { SavedItemsModal } from './components/SavedItemsModal';
@@ -57,11 +59,20 @@ export default function App() {
     );
   };
 
-  // Navigation tab state (defaults to 'home', or 'admin' if secret route is accessed)
-  const [activeTab, setActiveTab] = useState<string>(() => {
+  // Helper to determine initial active tab from pathname/hash
+  const checkInitialTab = (): string => {
+    if (typeof window === 'undefined') return 'home';
     if (checkIsOwnerPath()) return 'admin';
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (path === '/login' || hash === '#login') return 'login';
+    if (path === '/register' || hash === '#register') return 'register';
+    if (path === '/user-dashboard' || hash === '#user-dashboard') return 'user-dashboard';
     return 'home';
-  });
+  };
+
+  // Navigation tab state (defaults to 'home', 'login', 'register', or 'admin')
+  const [activeTab, setActiveTab] = useState<string>(() => checkInitialTab());
 
   // Authentication states
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => dbService.getCurrentUser());
@@ -230,10 +241,30 @@ export default function App() {
     refreshAppData();
   };
 
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTab(checkInitialTab());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleAuthSuccess = (user: UserAccount) => {
+    setCurrentUser(user);
+    setIsUserAuthModalOpen(false);
+    setActiveTab('home');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    refreshAppData();
+  };
+
   const handleLogoutUser = () => {
     dbService.userLogout();
     setCurrentUser(null);
     setActiveTab('home');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     refreshAppData();
   };
 
@@ -256,13 +287,25 @@ export default function App() {
   };
 
   const handleTabChange = (tab: string) => {
-    // Strict Privacy Guard: If owner session is active, owner CANNOT navigate to user profile/dashboard
-    if (isOwnerAuth && tab === 'user-dashboard') {
+    // Strict Privacy Guard: If owner session is active, owner CANNOT navigate to user profile/dashboard/auth
+    if (isOwnerAuth && (tab === 'user-dashboard' || tab === 'login' || tab === 'register')) {
       setActiveTab('admin');
+      window.history.pushState({}, '', '/owner-atelier');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     setActiveTab(tab);
+    if (tab === 'login') {
+      window.history.pushState({}, '', '/login');
+    } else if (tab === 'register') {
+      window.history.pushState({}, '', '/register');
+    } else if (tab === 'user-dashboard') {
+      window.history.pushState({}, '', '/user-dashboard');
+    } else if (tab === 'home') {
+      window.history.pushState({}, '', '/');
+    } else if (tab === 'admin') {
+      window.history.pushState({}, '', '/owner-atelier');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -514,13 +557,13 @@ export default function App() {
                     </div>
                     <div className="pt-2 flex flex-col gap-2">
                       <button
-                        onClick={() => setIsUserAuthModalOpen(true)}
+                        onClick={() => handleTabChange('login')}
                         className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-md transition-all cursor-pointer"
                       >
-                        Buka Formulir Daftar / Masuk
+                        Buka Halaman Masuk / Daftar
                       </button>
                       <button
-                        onClick={() => setActiveTab('home')}
+                        onClick={() => handleTabChange('home')}
                         className="w-full py-2.5 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-medium cursor-pointer"
                       >
                         Kembali ke Beranda
@@ -532,7 +575,41 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* 7. ADMIN / OWNER DASHBOARD (SECURE GATE) */}
+          {/* 7. DEDICATED LOGIN PAGE */}
+          {activeTab === 'login' && (
+            <motion.div
+              key="login"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
+              <LoginPage
+                onSuccess={handleAuthSuccess}
+                onNavigateToRegister={() => handleTabChange('register')}
+                onNavigateToHome={() => handleTabChange('home')}
+              />
+            </motion.div>
+          )}
+
+          {/* 8. DEDICATED REGISTER PAGE */}
+          {activeTab === 'register' && (
+            <motion.div
+              key="register"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
+              <RegisterPage
+                onSuccess={handleAuthSuccess}
+                onNavigateToLogin={() => handleTabChange('login')}
+                onNavigateToHome={() => handleTabChange('home')}
+              />
+            </motion.div>
+          )}
+
+          {/* 9. ADMIN / OWNER DASHBOARD (SECURE GATE) */}
           {activeTab === 'admin' && (
             <motion.div
               key="admin"
@@ -561,7 +638,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* 8. CLOUD BACKUPS (FREE TIER M0) */}
+          {/* 10. CLOUD BACKUPS (FREE TIER M0) */}
           {activeTab === 'backups' && (
             <motion.div
               key="backups"
@@ -577,7 +654,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* 9. API DOCS & GOLANG INTEGRATION */}
+          {/* 11. API DOCS & GOLANG INTEGRATION */}
           {activeTab === 'api-docs' && (
             <motion.div
               key="api-docs"
@@ -596,10 +673,7 @@ export default function App() {
       <UserAuthModal
         isOpen={isUserAuthModalOpen}
         onClose={() => setIsUserAuthModalOpen(false)}
-        onSuccess={user => {
-          setCurrentUser(user);
-          refreshAppData();
-        }}
+        onSuccess={handleAuthSuccess}
       />
 
       {/* Saved Items / Wishlist Modal */}

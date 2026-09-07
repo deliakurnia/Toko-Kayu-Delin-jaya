@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Package,
   AlertTriangle,
+  AlertCircle,
   FileText,
   Printer,
   Clock,
@@ -64,13 +65,36 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   const [reportErrorMessage, setReportErrorMessage] = useState<string | null>(null);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
-  const loadUserData = () => {
+  // Profile editing state
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState(currentUser.name);
+  const [editCity, setEditCity] = useState(currentUser.city || '');
+  const [editAddress, setEditAddress] = useState(currentUser.address || '');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const loadUserData = async () => {
     const allInquiries = dbService.getInquiries();
     // Match by WhatsApp or Email
-    const userInquiries = allInquiries.filter(
+    let userInquiries = allInquiries.filter(
       inq => inq.whatsappNumber === currentUser.whatsappNumber || (inq.customerEmail && inq.customerEmail.toLowerCase() === currentUser.email.toLowerCase())
     );
     setInquiries(userInquiries);
+
+    // Fetch live inquiries from backend (isolated endpoint)
+    try {
+      const live = await dbService.getUserInquiriesFromBackend(currentUser.whatsappNumber);
+      if (live && live.length > 0) {
+        const existingNos = new Set(userInquiries.map(i => i.inquiryNumber));
+        const newOnes = live.filter(i => !existingNos.has(i.inquiryNumber));
+        if (newOnes.length > 0) {
+          userInquiries = [...userInquiries, ...newOnes];
+          setInquiries(userInquiries);
+        }
+      }
+    } catch {
+      // Keep existing local inquiries
+    }
 
     const allReports = dbService.getOrderReports();
     const userReports = allReports.filter(
@@ -81,6 +105,33 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     // Load user's private saved items
     const saved = dbService.getSavedItems(currentUser);
     setUserSavedItems(saved);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      setProfileMsg({ type: 'error', text: 'Nama lengkap tidak boleh kosong.' });
+      return;
+    }
+    setIsSavingProfile(true);
+    setProfileMsg(null);
+    try {
+      const res = await dbService.updateUserProfile(currentUser.whatsappNumber, {
+        name: editName.trim(),
+        city: editCity.trim(),
+        address: editAddress.trim()
+      });
+      if (res.success && res.user) {
+        setProfileMsg({ type: 'success', text: 'Profil dan alamat kargo berhasil diperbarui.' });
+        setIsEditingProfile(false);
+      } else {
+        setProfileMsg({ type: 'error', text: res.error || 'Gagal memperbarui profil.' });
+      }
+    } catch {
+      setProfileMsg({ type: 'error', text: 'Terjadi kesalahan saat menyimpan profil.' });
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleRemoveSavedItem = (referenceId: string) => {
@@ -853,7 +904,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         {/* TAB 4: PROFIL AKUN & ALAMAT PENGIRIMAN */}
         {activeTab === 'profile' && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
                   <User className="w-5 h-5 text-amber-400" />
@@ -863,54 +914,153 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                   Data kontak pribadi dan alamat pengiriman kargo terverifikasi Toko Delin Jaya.
                 </p>
               </div>
+
+              {!isEditingProfile && (
+                <button
+                  onClick={() => {
+                    setEditName(currentUser.name);
+                    setEditCity(currentUser.city || '');
+                    setEditAddress(currentUser.address || '');
+                    setProfileMsg(null);
+                    setIsEditingProfile(true);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  Ubah Profil &amp; Alamat
+                </button>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Account Info Card */}
-              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+            {profileMsg && (
+              <div
+                className={`p-3.5 rounded-xl text-xs flex items-center gap-2.5 ${
+                  profileMsg.type === 'success'
+                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                    : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                }`}
+              >
+                {profileMsg.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                )}
+                <span>{profileMsg.text}</span>
+              </div>
+            )}
+
+            {isEditingProfile ? (
+              /* Profile Edit Form Card */
+              <form onSubmit={handleSaveProfile} className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
                 <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Informasi Identitas Pelanggan
+                  <ShieldCheck className="w-4 h-4 text-amber-400" />
+                  Formulir Pembaruan Data Pemesan
                 </h3>
-                <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
-                    <span className="text-stone-500 block">Nama Lengkap:</span>
-                    <span className="text-stone-200 font-semibold text-sm">{currentUser.name}</span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="block text-stone-400 mb-1 font-medium">Nama Lengkap</label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-stone-800 text-stone-100 focus:outline-none focus:border-amber-500"
+                      required
+                    />
                   </div>
-                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
-                    <span className="text-stone-500 block">Nomor WhatsApp Aktif:</span>
-                    <span className="text-stone-200 font-mono font-semibold">{currentUser.phone}</span>
+
+                  <div>
+                    <label className="block text-stone-400 mb-1 font-medium">Kota / Kabupaten Tujuan</label>
+                    <input
+                      type="text"
+                      value={editCity}
+                      onChange={(e) => setEditCity(e.target.value)}
+                      placeholder="contoh: Surabaya, Jawa Timur"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-stone-800 text-stone-100 focus:outline-none focus:border-amber-500"
+                    />
                   </div>
-                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
-                    <span className="text-stone-500 block">Status Akun:</span>
-                    <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Terverifikasi Pelanggan Delin Jaya
-                    </span>
+                </div>
+
+                <div className="text-xs">
+                  <label className="block text-stone-400 mb-1 font-medium">Alamat Lengkap Kargo (Jalan, RT/RW, Kecamatan)</label>
+                  <textarea
+                    rows={2}
+                    value={editAddress}
+                    onChange={(e) => setEditAddress(e.target.value)}
+                    placeholder="Alamat lengkap untuk kurir kargo kayu"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-stone-800 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSavingProfile}
+                    className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition-colors cursor-pointer disabled:opacity-60"
+                  >
+                    {isSavingProfile ? 'Menyimpan Perubahan...' : 'Simpan Pembaruan'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingProfile(false)}
+                    className="px-4 py-2.5 rounded-xl text-stone-400 hover:text-stone-200 text-xs transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Profile Details Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Account Info Card */}
+                <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+                  <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Informasi Identitas Pelanggan
+                  </h3>
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Nama Lengkap:</span>
+                      <span className="text-stone-200 font-semibold text-sm">{currentUser.name}</span>
+                    </div>
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Nomor WhatsApp Aktif:</span>
+                      <span className="text-stone-200 font-mono font-semibold">{currentUser.whatsappNumber || (currentUser as any).phone}</span>
+                    </div>
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Alamat Email:</span>
+                      <span className="text-stone-200 font-medium">{currentUser.email}</span>
+                    </div>
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Status Akun:</span>
+                      <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Terverifikasi Pelanggan Delin Jaya
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Address Card */}
+                <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+                  <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-amber-400" />
+                    Alamat Pengiriman Utama
+                  </h3>
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Kota / Wilayah Tujuan:</span>
+                      <span className="text-stone-200 font-semibold">{currentUser.city || 'Belum ditentukan'}</span>
+                    </div>
+                    <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                      <span className="text-stone-500 block">Alamat Lengkap Kargo:</span>
+                      <p className="text-stone-300 mt-1 leading-relaxed">
+                        {currentUser.address || 'Alamat otomatis tersimpan saat Anda membuat pesanan kargo pertama kali.'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Delivery Address Card */}
-              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
-                <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-amber-400" />
-                  Alamat Pengiriman Utama
-                </h3>
-                <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
-                    <span className="text-stone-500 block">Kota / Wilayah Tujuan:</span>
-                    <span className="text-stone-200 font-semibold">{currentUser.city || 'Belum ditentukan'}</span>
-                  </div>
-                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
-                    <span className="text-stone-500 block">Alamat Lengkap Kargo:</span>
-                    <p className="text-stone-300 mt-1 leading-relaxed">
-                      {currentUser.address || 'Alamat otomatis tersimpan saat Anda membuat pesanan kargo pertama kali.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         )}
 

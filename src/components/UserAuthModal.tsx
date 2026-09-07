@@ -31,13 +31,13 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const res = dbService.registerUser({
+      const res = await dbService.registerUser({
         name,
         email,
         whatsappNumber,
@@ -59,13 +59,13 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const res = dbService.loginUser(loginIdentifier);
+      const res = await dbService.loginUser(loginIdentifier);
       if (!res.success || !res.user) {
         setError(res.error || 'Akun tidak ditemukan.');
         setLoading(false);

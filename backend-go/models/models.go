@@ -73,6 +73,40 @@ type Customer struct {
 	Notes           string             `bson:"notes,omitempty" json:"notes,omitempty"`
 }
 
+// UserAccount model akun pemesan/pelanggan terdaftar di MongoDB Atlas & Local Store
+type UserAccount struct {
+	ID             primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name           string             `bson:"name" json:"name"`
+	WhatsAppNumber string             `bson:"whatsapp_number" json:"whatsappNumber"` // 62...
+	Email          string             `bson:"email" json:"email"`
+	City           string             `bson:"city" json:"city"`
+	Address        string             `bson:"address,omitempty" json:"address,omitempty"`
+	Role           string             `bson:"role" json:"role"` // "customer"
+	CreatedAt      time.Time          `bson:"created_at" json:"createdAt"`
+	LastLoginAt    time.Time          `bson:"last_login_at" json:"lastLoginAt"`
+}
+
+// RegisterUserRequest payload pendaftaran akun pemesan baru
+type RegisterUserRequest struct {
+	Name           string `json:"name"`
+	WhatsAppNumber string `json:"whatsappNumber"`
+	Email          string `json:"email"`
+	City           string `json:"city"`
+	Address        string `json:"address,omitempty"`
+}
+
+// LoginUserRequest payload masuk akun pemesan
+type LoginUserRequest struct {
+	Identifier string `json:"identifier"` // Email atau nomor WhatsApp
+}
+
+// UpdateUserProfileRequest payload pembaruan data profil pelanggan
+type UpdateUserProfileRequest struct {
+	Name    string `json:"name"`
+	City    string `json:"city"`
+	Address string `json:"address"`
+}
+
 // Inquiry pesanan / permintaan (PRD 6.2)
 type Inquiry struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty" json:"id"`

@@ -206,15 +206,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
               </button>
             ) : (
-              /* SAAT BELUM LOGIN: TAMPILKAN TOMBOL DAFTAR / MASUK */
-              <button
-                onClick={onOpenAuthModal}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-amber-500 hover:text-stone-950 border border-stone-200 dark:border-stone-700 transition-all cursor-pointer flex items-center gap-1.5"
-                title="Daftar akun pemesan dengan email & WhatsApp aktif"
-              >
-                <User className="w-3.5 h-3.5 text-amber-500" />
-                <span>Daftar / Masuk</span>
-              </button>
+              /* SAAT BELUM LOGIN: TAMPILKAN TOMBOL MASUK & DAFTAR TERPISAH */
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => handleTabClick('login')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTab === 'login'
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                      : 'bg-stone-100 dark:bg-stone-800/90 text-stone-700 dark:text-stone-300 hover:bg-amber-500 hover:text-stone-950 border border-stone-200 dark:border-stone-700'
+                  }`}
+                  title="Masuk ke akun pemesan terdaftar"
+                >
+                  <User className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Masuk</span>
+                </button>
+                <button
+                  onClick={() => handleTabClick('register')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    selectedTab === 'register'
+                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400'
+                  }`}
+                  title="Daftar akun pemesan baru"
+                >
+                  <span>Daftar</span>
+                </button>
+              </div>
             )}
 
             {/* CTA + Buat Pesanan */}
@@ -360,17 +377,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 </div>
               ) : (
-                /* SAAT BELUM LOGIN: TAMPILKAN FORMULIR MASUK */
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuthModal();
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-left text-sm font-medium text-stone-200 bg-stone-800 hover:bg-stone-700 cursor-pointer"
-                >
-                  <User className="w-4 h-4 text-amber-400" />
-                  <span>Daftar / Masuk Akun Pemesan</span>
-                </button>
+                /* SAAT BELUM LOGIN: TAMPILKAN TOMBOL MASUK DAN DAFTAR */
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={() => handleTabClick('login')}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700 cursor-pointer hover:bg-stone-200"
+                  >
+                    <User className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Masuk Akun</span>
+                  </button>
+                  <button
+                    onClick={() => handleTabClick('register')}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white cursor-pointer shadow-xs"
+                  >
+                    <span>Daftar Baru</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

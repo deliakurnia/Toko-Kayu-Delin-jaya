@@ -1996,15 +1996,17 @@ class DatabaseService {
     }
   }
 
-  public registerUser(params: {
+  public async registerUser(params: {
     name: string;
     email: string;
     whatsappNumber: string;
     city: string;
-  }): { success: boolean; user?: UserAccount; error?: string } {
+    address?: string;
+  }): Promise<{ success: boolean; user?: UserAccount; error?: string }> {
     const cleanName = sanitizeInput(params.name);
     const cleanEmail = sanitizeInput(params.email).toLowerCase();
     const cleanCity = sanitizeInput(params.city);
+    const cleanAddress = sanitizeInput(params.address || '');
     const normalizedPhone = normalizeWhatsApp(params.whatsappNumber);
 
     if (!cleanName || cleanName.length < 2) {
@@ -2017,17 +2019,69 @@ class DatabaseService {
       return { success: false, error: 'Nomor WhatsApp aktif tidak valid. Wajib format nomor Indonesia yang aktif.' };
     }
 
+    // Attempt Go Backend Registration (MongoDB Atlas Cloud Live)
+    try {
+      const resp = await fetch('/api/v1/auth/user/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cleanName,
+          whatsappNumber: normalizedPhone,
+          email: cleanEmail,
+          city: cleanCity || 'Indonesia',
+          address: cleanAddress
+        })
+      });
+
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result.success && result.user) {
+          const user: UserAccount = {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            whatsappNumber: result.user.whatsappNumber,
+            city: result.user.city,
+            address: result.user.address || cleanAddress,
+            registeredAt: result.user.createdAt || new Date().toISOString(),
+            createdAt: result.user.createdAt,
+            lastLoginAt: result.user.lastLoginAt || new Date().toISOString(),
+            role: (result.user.role === 'customer' || result.user.role === 'user') ? 'customer' : 'owner'
+          };
+
+          const users = this.getUsers();
+          const existingIdx = users.findIndex(u => u.email === user.email || u.whatsappNumber === user.whatsappNumber);
+          if (existingIdx >= 0) {
+            users[existingIdx] = user;
+          } else {
+            users.push(user);
+          }
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+          localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+
+          this.logSecurityEvent('user_register', `Pengguna ${cleanName} (${cleanEmail} / +${normalizedPhone}) berhasil terdaftar via MongoDB Atlas.`, 'info');
+          this.notify('USER_AUTH_CHANGED', user);
+
+          return { success: true, user };
+        } else if (result.error) {
+          return { success: false, error: result.error };
+        }
+      }
+    } catch {
+      // Fallback to local store if backend network unreachable
+    }
+
+    // Local Resilient Fallback
     const users = this.getUsers();
     let existing = users.find(u => u.email === cleanEmail || u.whatsappNumber === normalizedPhone);
-
     const now = new Date().toISOString();
 
     if (existing) {
-      // Update existing user profile
       existing.name = cleanName;
       existing.email = cleanEmail;
       existing.whatsappNumber = normalizedPhone;
       existing.city = cleanCity || existing.city;
+      existing.address = cleanAddress || existing.address;
       existing.lastLoginAt = now;
     } else {
       existing = {
@@ -2036,7 +2090,9 @@ class DatabaseService {
         email: cleanEmail,
         whatsappNumber: normalizedPhone,
         city: cleanCity || 'Indonesia',
+        address: cleanAddress,
         registeredAt: now,
+        createdAt: now,
         lastLoginAt: now,
         role: 'user'
       };
@@ -2046,7 +2102,6 @@ class DatabaseService {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(existing));
 
-    // Also sync to customer table for CRM
     let customers = this.getCustomers();
     let customer = customers.find(c => c.whatsappNumber === normalizedPhone);
     if (customer) {
@@ -2068,17 +2123,64 @@ class DatabaseService {
     }
     localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
 
-    this.logSecurityEvent('user_register', `Pengguna ${cleanName} (${cleanEmail} / +${normalizedPhone}) berhasil terdaftar.`, 'info');
+    this.logSecurityEvent('user_register', `Pengguna ${cleanName} (${cleanEmail} / +${normalizedPhone}) berhasil terdaftar (offline-resilient).`, 'info');
     this.notify('USER_AUTH_CHANGED', existing);
 
     return { success: true, user: existing };
   }
 
-  public loginUser(identifier: string): { success: boolean; user?: UserAccount; error?: string } {
+  public async loginUser(identifier: string): Promise<{ success: boolean; user?: UserAccount; error?: string }> {
     const cleanId = sanitizeInput(identifier).trim().toLowerCase();
     const normalizedPhone = normalizeWhatsApp(cleanId);
-    const users = this.getUsers();
 
+    // Attempt Go Backend Login
+    try {
+      const resp = await fetch('/api/v1/auth/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: cleanId })
+      });
+
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result.success && result.user) {
+          const user: UserAccount = {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            whatsappNumber: result.user.whatsappNumber,
+            city: result.user.city,
+            address: result.user.address,
+            registeredAt: result.user.createdAt || new Date().toISOString(),
+            createdAt: result.user.createdAt,
+            lastLoginAt: result.user.lastLoginAt || new Date().toISOString(),
+            role: (result.user.role === 'customer' || result.user.role === 'user') ? 'customer' : 'owner'
+          };
+
+          const users = this.getUsers();
+          const idx = users.findIndex(u => u.email === user.email || u.whatsappNumber === user.whatsappNumber);
+          if (idx >= 0) {
+            users[idx] = user;
+          } else {
+            users.push(user);
+          }
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+          localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+
+          this.logSecurityEvent('user_login', `Pengguna ${user.name} (${user.email}) login via MongoDB Atlas.`, 'info');
+          this.notify('USER_AUTH_CHANGED', user);
+
+          return { success: true, user };
+        } else if (result.error) {
+          return { success: false, error: result.error };
+        }
+      }
+    } catch {
+      // Fallback to local store
+    }
+
+    // Local Resilient Fallback
+    const users = this.getUsers();
     const user = users.find(u => u.email.toLowerCase() === cleanId || u.whatsappNumber === normalizedPhone || u.whatsappNumber === cleanId);
 
     if (!user) {
@@ -2089,10 +2191,93 @@ class DatabaseService {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
 
-    this.logSecurityEvent('user_login', `Pengguna ${user.name} (${user.email}) login ke dashboard.`, 'info');
+    this.logSecurityEvent('user_login', `Pengguna ${user.name} (${user.email}) login ke dashboard (offline-resilient).`, 'info');
     this.notify('USER_AUTH_CHANGED', user);
 
     return { success: true, user };
+  }
+
+  public async updateUserProfile(
+    phone: string,
+    updates: { name: string; city: string; address: string }
+  ): Promise<{ success: boolean; user?: UserAccount; error?: string }> {
+    const cleanPhone = normalizeWhatsApp(phone);
+    const cleanName = sanitizeInput(updates.name);
+    const cleanCity = sanitizeInput(updates.city);
+    const cleanAddress = sanitizeInput(updates.address);
+
+    try {
+      const resp = await fetch(`/api/v1/user/profile/${encodeURIComponent(cleanPhone)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cleanName,
+          city: cleanCity,
+          address: cleanAddress
+        })
+      });
+
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result.success && result.user) {
+          const user: UserAccount = {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            whatsappNumber: result.user.whatsappNumber,
+            city: result.user.city,
+            address: result.user.address,
+            registeredAt: result.user.createdAt,
+            createdAt: result.user.createdAt,
+            lastLoginAt: result.user.lastLoginAt,
+            role: result.user.role
+          };
+
+          const users = this.getUsers();
+          const idx = users.findIndex(u => u.whatsappNumber === cleanPhone);
+          if (idx >= 0) users[idx] = user;
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+          localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+          this.notify('USER_AUTH_CHANGED', user);
+
+          return { success: true, user };
+        }
+      }
+    } catch {
+      // Local fallback
+    }
+
+    const current = this.getCurrentUser();
+    if (current) {
+      current.name = cleanName;
+      current.city = cleanCity;
+      current.address = cleanAddress;
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(current));
+      const users = this.getUsers();
+      const idx = users.findIndex(u => u.whatsappNumber === cleanPhone);
+      if (idx >= 0) users[idx] = current;
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+      this.notify('USER_AUTH_CHANGED', current);
+      return { success: true, user: current };
+    }
+
+    return { success: false, error: 'Gagal memperbarui profil pengguna.' };
+  }
+
+  public async getUserInquiriesFromBackend(phone: string): Promise<Inquiry[]> {
+    const cleanPhone = normalizeWhatsApp(phone);
+    try {
+      const resp = await fetch(`/api/v1/user/inquiries/${encodeURIComponent(cleanPhone)}`);
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result.success && Array.isArray(result.data)) {
+          return result.data;
+        }
+      }
+    } catch {
+      // Return empty or fallback
+    }
+    return [];
   }
 
   public logoutUser(): void {

@@ -204,9 +204,11 @@ export interface UserAccount {
   email: string;
   whatsappNumber: string;
   city: string;
-  registeredAt: string;
+  address?: string;
+  registeredAt?: string;
+  createdAt?: string;
   lastLoginAt: string;
-  role: 'user' | 'owner';
+  role: 'user' | 'owner' | 'customer';
 }
 
 export type IssueType = 'belum_sampai' | 'keterlambatan_ekspedisi' | 'status_stuck' | 'kerusakan' | 'lainnya';

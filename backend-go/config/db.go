@@ -38,6 +38,7 @@ type LocalDatabase struct {
 	Woods        []models.WoodType          `json:"woods"`
 	Categories   []models.ProductCategory   `json:"categories"`
 	Customers    []models.Customer          `json:"customers"`
+	Users        []models.UserAccount       `json:"users"`
 	Inquiries    []models.Inquiry           `json:"inquiries"`
 	Reports      []models.OrderReport       `json:"reports"`
 	Backups      []models.BackupSnapshot    `json:"backups"`
@@ -130,6 +131,16 @@ func (s *StorageEngine) initIndexes(ctx context.Context) {
 	// Index pencarian waktu untuk inquiries
 	_, _ = s.MongoDb.Collection("inquiries").Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{{Key: "created_at", Value: -1}},
+	})
+
+	// Unique indexes untuk koleksi akun pengguna (users)
+	_, _ = s.MongoDb.Collection("users").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "whatsapp_number", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	})
+	_, _ = s.MongoDb.Collection("users").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "email", Value: 1}},
+		Options: options.Index().SetUnique(true),
 	})
 }
 
@@ -286,6 +297,7 @@ func (s *StorageEngine) initLocalStorage() error {
 					Notes:           "Prinsipal Studio Arsitek, rutin order material kayu sonokeling untuk proyek villa",
 				},
 			},
+			Users:        []models.UserAccount{},
 			Inquiries:    []models.Inquiry{},
 			Reports:      []models.OrderReport{},
 			Backups:      []models.BackupSnapshot{},
@@ -385,6 +397,156 @@ func (s *StorageEngine) GetCustomers() ([]models.Customer, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.localData.Customers, nil
+}
+
+// =========================================================================
+// USER ACCOUNT OPERATIONS (MONGODB ATLAS & LOCAL STORE)
+// =========================================================================
+
+func (s *StorageEngine) SaveUser(u *models.UserAccount) error {
+	now := time.Now()
+	if u.ID.IsZero() {
+		u.ID = primitive.NewObjectID()
+	}
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = now
+	}
+	if u.LastLoginAt.IsZero() {
+		u.LastLoginAt = now
+	}
+	if u.Role == "" {
+		u.Role = "customer"
+	}
+
+	if s.IsCloudLive && s.MongoDb != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		opts := options.Update().SetUpsert(true)
+		_, err := s.MongoDb.Collection("users").UpdateOne(ctx, bson.M{
+			"$or": []bson.M{
+				{"whatsapp_number": u.WhatsAppNumber},
+				{"email": strings.ToLower(u.Email)},
+			},
+		}, bson.M{
+			"$set": u,
+		}, opts)
+		if err != nil {
+			log.Printf("⚠️ Gagal simpan user ke MongoDB: %v", err)
+		}
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	found := false
+	for i, item := range s.localData.Users {
+		if item.WhatsAppNumber == u.WhatsAppNumber || strings.EqualFold(item.Email, u.Email) {
+			s.localData.Users[i] = *u
+			found = true
+			break
+		}
+	}
+	if !found {
+		s.localData.Users = append(s.localData.Users, *u)
+	}
+	return s.flushLocalFileLocked()
+}
+
+func (s *StorageEngine) GetUserByIdentifier(identifier string) (*models.UserAccount, error) {
+	cleanId := strings.TrimSpace(strings.ToLower(identifier))
+
+	if s.IsCloudLive && s.MongoDb != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		var user models.UserAccount
+		err := s.MongoDb.Collection("users").FindOne(ctx, bson.M{
+			"$or": []bson.M{
+				{"email": cleanId},
+				{"whatsapp_number": cleanId},
+			},
+		}).Decode(&user)
+		if err == nil {
+			return &user, nil
+		}
+	}
+
+	// Local fallback
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, u := range s.localData.Users {
+		if strings.EqualFold(u.Email, cleanId) || u.WhatsAppNumber == cleanId {
+			return &u, nil
+		}
+	}
+	return nil, fmt.Errorf("akun tidak ditemukan")
+}
+
+func (s *StorageEngine) UpdateUserProfile(phone string, name string, city string, address string) (*models.UserAccount, error) {
+	var updated *models.UserAccount
+
+	if s.IsCloudLive && s.MongoDb != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		updateFields := bson.M{
+			"name":    name,
+			"city":    city,
+			"address": address,
+		}
+		_, err := s.MongoDb.Collection("users").UpdateOne(ctx, bson.M{"whatsapp_number": phone}, bson.M{"$set": updateFields})
+		if err != nil {
+			log.Printf("⚠️ Gagal update profile di MongoDB: %v", err)
+		}
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i, item := range s.localData.Users {
+		if item.WhatsAppNumber == phone {
+			s.localData.Users[i].Name = name
+			s.localData.Users[i].City = city
+			s.localData.Users[i].Address = address
+			copyU := s.localData.Users[i]
+			updated = &copyU
+			break
+		}
+	}
+
+	if updated == nil {
+		return nil, fmt.Errorf("pengguna tidak ditemukan")
+	}
+
+	if err := s.flushLocalFileLocked(); err != nil {
+		return updated, err
+	}
+	return updated, nil
+}
+
+func (s *StorageEngine) GetUserInquiries(phone string) ([]models.Inquiry, error) {
+	if s.IsCloudLive && s.MongoDb != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		findOptions := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+		cursor, err := s.MongoDb.Collection("inquiries").Find(ctx, bson.M{"whatsapp_number": phone}, findOptions)
+		if err == nil {
+			var list []models.Inquiry
+			if err := cursor.All(ctx, &list); err == nil {
+				return list, nil
+			}
+		}
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var result []models.Inquiry
+	for _, item := range s.localData.Inquiries {
+		if item.WhatsAppNumber == phone {
+			result = append(result, item)
+		}
+	}
+	return result, nil
 }
 
 // =========================================================================

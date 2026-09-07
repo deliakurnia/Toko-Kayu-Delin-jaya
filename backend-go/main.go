@@ -164,6 +164,13 @@ func main() {
 	api.Get("/backups", handlers.GetBackupsHandler)
 	api.Get("/security/logs", handlers.GetSecurityLogsHandler)
 
+	// User Authentication & Profile (Akun Pemesan Pelanggan)
+	api.Post("/auth/user/register", handlers.RegisterUserHandler)
+	api.Post("/auth/user/login", handlers.LoginUserHandler)
+	api.Get("/user/profile/:phone", handlers.GetUserProfileHandler)
+	api.Put("/user/profile/:phone", handlers.UpdateUserProfileHandler)
+	api.Get("/user/inquiries/:phone", handlers.GetUserInquiriesHandler)
+
 	// Owner Auth Passcode Check
 	api.Post("/auth/verify", handlers.VerifyPasscodeHandler)
 

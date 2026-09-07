@@ -199,15 +199,15 @@
       "notes": "Prinsipal Studio Arsitek, rutin order material kayu sonokeling untuk proyek villa"
     },
     {
-      "id": "6a9e5ddbb6d5923f59f548ab",
+      "id": "6a9edea74155e10567e0bed6",
       "whatsappNumber": "6281234567890",
-      "name": "Budi Hartono",
-      "city": "Jakarta Selatan",
-      "email": "budi.hartono@example.com",
-      "totalOrders": 1,
+      "name": "Budi Santoso",
+      "city": "Surabaya",
+      "email": "budi.santoso@example.com",
+      "totalOrders": 0,
       "isLoyalCustomer": false,
-      "firstOrderAt": "2026-09-07T13:46:51.3762724+07:00",
-      "lastOrderAt": "2026-09-07T13:46:51.3762724+07:00"
+      "firstOrderAt": "2026-09-07T22:56:23.3928876+07:00",
+      "lastOrderAt": "2026-09-07T22:56:23.3928876+07:00"
     },
     {
       "id": "6a9e5e09b6d5923f59f548ae",
@@ -230,6 +230,19 @@
       "isLoyalCustomer": false,
       "firstOrderAt": "2026-09-07T15:23:16.2330293+07:00",
       "lastOrderAt": "2026-09-07T15:23:16.2330293+07:00"
+    }
+  ],
+  "users": [
+    {
+      "id": "6a9edea74155e10567e0bed6",
+      "name": "Budi Santoso",
+      "whatsappNumber": "6281234567890",
+      "email": "budi.santoso@example.com",
+      "city": "Surabaya",
+      "address": "Jl. Gubeng No. 12",
+      "role": "customer",
+      "createdAt": "2026-09-07T15:56:23.392Z",
+      "lastLoginAt": "2026-09-07T22:56:31.5905082+07:00"
     }
   ],
   "inquiries": [
@@ -361,6 +374,30 @@
     }
   ],
   "securityLogs": [
+    {
+      "id": "6a9edeaf4155e10567e0bed9",
+      "eventType": "user_login_success",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pelanggan Budi Santoso (budi.santoso@example.com) berhasil masuk ke sistem.",
+      "severity": "info",
+      "timestamp": "2026-09-07T22:56:31.6145564+07:00"
+    },
+    {
+      "id": "6a9edeaa4155e10567e0bed8",
+      "eventType": "user_login_success",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pelanggan Budi Santoso (budi.santoso@example.com) berhasil masuk ke sistem.",
+      "severity": "info",
+      "timestamp": "2026-09-07T22:56:26.5542331+07:00"
+    },
+    {
+      "id": "6a9edea74155e10567e0bed7",
+      "eventType": "user_registered",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pelanggan Budi Santoso (budi.santoso@example.com / +6281234567890) berhasil terdaftar di sistem.",
+      "severity": "info",
+      "timestamp": "2026-09-07T22:56:23.3928876+07:00"
+    },
     {
       "id": "6a9e750ae16190e1e8e57231",
       "eventType": "inquiry_status_updated",

@@ -271,3 +271,33 @@ func UpdateInquiryStatusHandler(c *fiber.Ctx) error {
 		"message": fmt.Sprintf("Status pesanan %s berhasil diubah ke '%s'", id, req.Status),
 	})
 }
+
+// GetUserInquiriesHandler mengambil riwayat pesanan KHUSUS milik pelanggan terkait (Data Isolation)
+func GetUserInquiriesHandler(c *fiber.Ctx) error {
+	phone := c.Params("phone")
+	if phone == "" {
+		phone = c.Query("phone")
+	}
+	if phone == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"error":   "Nomor WhatsApp pelanggan wajib disertakan",
+		})
+	}
+
+	cleanPhone := normalizePhone(phone)
+	inquiries, err := config.Store.GetUserInquiries(cleanPhone)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mengambil riwayat pesanan pelanggan",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success":       true,
+		"total":         len(inquiries),
+		"storageEngine": config.Store.EngineName,
+		"data":          inquiries,
+	})
+}
