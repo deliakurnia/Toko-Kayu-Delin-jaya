@@ -92,17 +92,18 @@ export default function App() {
   const [isSavedItemsOpen, setIsSavedItemsOpen] = useState<boolean>(false);
   const [isCommandBarOpen, setIsCommandBarOpen] = useState<boolean>(false);
 
-  // Global Keyboard Shortcut: Ctrl+K / Cmd+K to toggle Command Bar
+  // Global Keyboard Shortcut: Ctrl+K / Cmd+K to toggle Command Bar (Khusus mode pengguna/toko)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        if (activeTab === 'admin') return; // Owner console does not use search bar
         e.preventDefault();
         setIsCommandBarOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [activeTab]);
 
   // Selection states for cross-component workflows
   const [selectedWoodFor3D, setSelectedWoodFor3D] = useState<WoodType | null>(null);
@@ -335,7 +336,6 @@ export default function App() {
           onLogoutOwner={handleLogoutOwner}
           isDarkMode={isDarkMode}
           onToggleDarkMode={handleToggleTheme}
-          onOpenCommandBar={() => setIsCommandBarOpen(true)}
         />
       ) : (
         <Navbar

@@ -12,17 +12,14 @@ import {
   Heart,
   Package,
   Plus,
-  Layers,
-  Activity,
   CornerDownLeft,
-  Sparkles,
-  Database
+  Sparkles
 } from 'lucide-react';
 import { WoodType } from '../types';
 
 export interface CommandItem {
   id: string;
-  category: 'woods' | 'furniture' | 'tools' | 'user' | 'owner';
+  category: 'woods' | 'furniture' | 'tools' | 'user';
   categoryLabel: string;
   title: string;
   subtitle: string;
@@ -266,51 +263,8 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
       }
     }));
 
-    // Owner Operations
-    const ownerItems: CommandItem[] = [
-      {
-        id: 'owner-overview',
-        category: 'owner',
-        categoryLabel: 'Konsol Pemilik',
-        title: 'Ringkasan Eksekutif Atelier',
-        subtitle: 'Statistik omzet, inquiry baru, dan log operasional bisnis Delin Jaya',
-        icon: <Layers className="w-4 h-4 text-amber-400" />,
-        badge: 'Admin Toko',
-        action: () => {
-          onSelectTab('admin');
-          onClose();
-        }
-      },
-      {
-        id: 'owner-stock',
-        category: 'owner',
-        categoryLabel: 'Konsol Pemilik',
-        title: 'Manajemen Stok & Harga Kayu',
-        subtitle: 'Pembaruan kuantitas log, volume kubikasi, dan status ketersediaan siap kirim',
-        icon: <Activity className="w-4 h-4 text-amber-400" />,
-        badge: 'Real-time Sync',
-        action: () => {
-          onSelectTab('admin');
-          onClose();
-        }
-      },
-      {
-        id: 'owner-infra',
-        category: 'owner',
-        categoryLabel: 'Konsol Pemilik',
-        title: 'Konektivitas Cloud Database & Server Go',
-        subtitle: 'Status latensi MongoDB Atlas Cloud dan status daemon kayu-nusantara-backend',
-        icon: <Database className="w-4 h-4 text-emerald-400" />,
-        badge: 'MongoDB Atlas',
-        action: () => {
-          onSelectTab('admin');
-          onClose();
-        }
-      }
-    ];
-
-    return [...woodItems, ...list, ...ownerItems];
-  }, [woods, currentUser, isOwnerAuth, onSelectTab, onSelectWood, onClose, onOpenSavedItems]);
+    return [...woodItems, ...list];
+  }, [woods, currentUser, onSelectTab, onSelectWood, onClose, onOpenSavedItems]);
 
   // Filtered items
   const filteredItems = useMemo(() => {
@@ -423,8 +377,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
               { id: 'woods', label: 'Kayu Solid' },
               { id: 'furniture', label: 'Mebel' },
               { id: 'tools', label: 'Alat & WebGL' },
-              { id: 'user', label: 'Akun & Pesanan' },
-              ...(isOwnerAuth ? [{ id: 'owner', label: 'Konsol Pemilik' }] : [])
+              { id: 'user', label: 'Akun & Pesanan' }
             ].map(cat => (
               <button
                 key={cat.id}
