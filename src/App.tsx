@@ -33,14 +33,14 @@ import { MessageSquare, Box, ArrowRight, ShieldAlert, UserCheck } from 'lucide-r
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
-  // Theme state: dark / light
+  // Theme state: dark / light (Default: Dark Atelier)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kn_theme');
       if (saved) return saved === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return true;
     }
-    return false;
+    return true;
   });
 
   // Helper to determine if current browser URL targets the owner atelier
@@ -325,7 +325,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-[#0f1115] text-slate-900 dark:text-stone-100 transition-colors duration-200 font-sans">
+    <div className="min-h-screen flex flex-col bg-[#0c0d10] text-stone-100 transition-colors duration-200 font-sans">
       {/* Top Navigation: Dedicated Konsol Pemilik vs Etalase Pelanggan */}
       {activeTab === 'admin' ? (
         <OwnerNavbar

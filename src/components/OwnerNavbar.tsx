@@ -49,7 +49,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
   onOpenNotifications = () => {},
   onReturnToStore,
   onLogoutOwner,
-  isDarkMode = false,
+  isDarkMode = true,
   onToggleDarkMode = () => {}
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,45 +75,40 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-3 z-40 w-full px-3 sm:px-6 max-w-7xl mx-auto transition-all duration-300">
+    <header className="w-full bg-[#0c0d10]/95 backdrop-blur-2xl border-b border-amber-900/30 sticky top-0 z-50 transition-all duration-300 text-stone-100">
       
-      {/* Neoglassmorphic Outer Double-Bezel Floating Shell */}
-      <div className="relative p-1 sm:p-1.5 rounded-2xl bg-black/45 backdrop-blur-2xl ring-1 ring-amber-500/20 shadow-[0_16px_50px_rgba(0,0,0,0.7)] transition-all">
-        
-        {/* Inner Glass Capsule Core */}
-        <div className="relative rounded-[calc(1rem-0.125rem)] bg-[#0d0e14]/85 border border-amber-500/20 px-3 sm:px-4 py-2 flex items-center justify-between gap-2 overflow-hidden shadow-2xs">
-          
-          {/* ThreeUI Ambient WebGL Micro-Shader Hairline */}
-          <div className="absolute inset-x-0 bottom-0 h-[2px] overflow-hidden pointer-events-none opacity-45">
-            <InterfaceLines
-              mode="dark"
-              hue={34}
-              saturation={1.4}
-              speed={0.35}
-              opacity={0.65}
-              density={0.8}
-              strokeWidth={1}
-              className="w-full h-full"
-            />
-          </div>
+      {/* ThreeUI Ambient WebGL Micro-Shader Hairline */}
+      <div className="absolute inset-x-0 bottom-0 h-[2px] overflow-hidden pointer-events-none opacity-45">
+        <InterfaceLines
+          mode="dark"
+          hue={34}
+          saturation={1.4}
+          speed={0.35}
+          opacity={0.65}
+          density={0.8}
+          strokeWidth={1}
+          className="w-full h-full"
+        />
+      </div>
 
-          {/* Left: Atelier Brand & Three.js 3D Specimen Micro-Visualizer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-18 gap-3">
+          
+          {/* LEFT: Atelier Brand & Three.js 3D Specimen */}
           <div className="flex items-center gap-2.5 sm:gap-3 select-none shrink-0">
-            {/* 3D WebGL Mini Specimen Cube (Three.js) */}
             <div className="ring-1 ring-amber-500/30 p-0.5 rounded-xl bg-amber-500/10 shadow-2xs flex items-center justify-center">
               <ThreeMiniWoodSpecimen isDark={true} />
             </div>
 
-            {/* Brand Emblem & Atelier Badge */}
             <div className="flex items-center gap-2">
               <div className="h-9 sm:h-10 flex items-center shrink-0">
                 <img
                   src="/logo-delin-jaya.png"
                   alt="Toko Delin Jaya Logo"
-                  className="h-8 sm:h-9 w-auto max-w-[110px] sm:max-w-[130px] object-contain rounded-md bg-white p-0.5 shadow-2xs border border-amber-500/30"
+                  className="h-8 sm:h-9 w-auto max-w-[105px] sm:max-w-[125px] object-contain rounded-md bg-white p-0.5 shadow-2xs border border-amber-500/30"
                 />
               </div>
-              <div className="hidden sm:block">
+              <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-serif text-sm sm:text-base font-bold tracking-tight text-amber-400">
                     Konsol Pemilik
@@ -123,15 +118,15 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
                     Sesi Terlindungi
                   </span>
                 </div>
-                <p className="text-[10px] text-stone-400 font-sans">
+                <p className="text-[10px] text-stone-400 font-sans hidden sm:block">
                   Manajemen Workshop Delin Jaya
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Center: Animated Top Dock Nav Links for Owner Workspace */}
-          <nav className="hidden xl:flex items-center gap-1 relative bg-[#14161f]/70 p-1 rounded-xl border border-stone-800/80">
+          {/* CENTER: Navigation Links for Owner Workspace */}
+          <nav className="hidden xl:flex items-center gap-1 relative bg-white/[0.03] p-1 rounded-xl border border-white/[0.07]">
             {navItems.map(item => {
               const isActive = activeSection === item.id;
               return (
@@ -153,7 +148,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
                   )}
                   {isActive && (
                     <motion.div
-                      layoutId="ownerAnimatedTopDockActiveTab"
+                      layoutId="ownerNavbarActiveIndicator"
                       className="absolute inset-0 bg-[#212433] rounded-lg border border-amber-500/35 shadow-xs -z-10"
                       transition={{ type: 'spring', stiffness: 440, damping: 32 }}
                     />
@@ -163,14 +158,14 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Action Controls: Notifications, Dark Mode, Etalase, Logout */}
+          {/* RIGHT: Action Controls (No Search Bar) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             
             {/* Operational Notifications Bell */}
             <button
               onClick={onOpenNotifications}
               title="Notifikasi Operasional Toko"
-              className="relative p-2 rounded-xl text-stone-300 hover:text-white hover:bg-stone-800/80 border border-stone-700/60 transition-colors cursor-pointer"
+              className="relative p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
@@ -184,7 +179,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
             <button
               onClick={onToggleDarkMode}
               title={isDarkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
-              className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-stone-800/80 border border-stone-700/60 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -193,7 +188,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
             <button
               onClick={onReturnToStore}
               title="Lihat Etalase Publik"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-stone-200 border border-stone-700 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/[0.06] hover:bg-white/[0.1] text-stone-200 border border-white/[0.1] transition-colors cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
               <span>Etalase</span>
@@ -212,7 +207,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="xl:hidden p-2 rounded-xl text-stone-300 hover:bg-stone-800/80 border border-stone-700/60 cursor-pointer"
+              className="xl:hidden p-2 rounded-xl text-stone-300 hover:bg-white/[0.06] border border-white/[0.08] cursor-pointer"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -221,15 +216,15 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
 
         </div>
 
-        {/* Mobile Navigation Drawer with Neoglassmorphism & Framer Motion */}
+        {/* Mobile Navigation Drawer with Framer Motion */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0, y: -8 }}
-              animate={{ opacity: 1, height: 'auto', y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -8 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-              className="xl:hidden overflow-hidden pt-3 pb-2 space-y-1.5 border-t border-stone-800/80 mt-1"
+              className="xl:hidden overflow-hidden pt-3 pb-3 space-y-1.5 border-t border-white/[0.08]"
             >
               {/* Owner Sections List */}
               <div className="space-y-1">
@@ -242,7 +237,7 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
                       className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-medium transition-colors cursor-pointer ${
                         isActive
                           ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40'
-                          : 'text-stone-300 hover:bg-stone-800/80'
+                          : 'text-stone-300 hover:bg-white/[0.04]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -260,13 +255,13 @@ export const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
               </div>
 
               {/* Mobile Store Return & Logout */}
-              <div className="pt-2 border-t border-stone-800 flex gap-2">
+              <div className="pt-2 border-t border-white/[0.08] flex gap-2">
                 <button
                   onClick={() => {
                     setMobileOpen(false);
                     onReturnToStore();
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-stone-800 text-stone-200 border border-stone-700 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/[0.06] text-stone-200 border border-white/[0.1] cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
                   <span>Lihat Toko</span>
