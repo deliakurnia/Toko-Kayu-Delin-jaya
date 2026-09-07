@@ -11,6 +11,7 @@ import {
   SavedItem
 } from './types';
 import { Navbar } from './components/Navbar';
+import { OwnerNavbar } from './components/OwnerNavbar';
 import { HeroSection } from './components/HeroSection';
 import { ThreeDVisualizer } from './components/ThreeDVisualizer';
 import { WoodCatalog } from './components/WoodCatalog';
@@ -103,13 +104,12 @@ export default function App() {
     const allInquiries = dbService.getInquiries() || [];
     const allCustomers = dbService.getCustomers() || [];
     const allBackups = dbService.getBackups() || [];
-    const allSaved = dbService.getSavedItems() || [];
-
     // Sync auth states first
     const activeOwner = dbService.isOwnerAuthenticated();
     const activeUser = dbService.getCurrentUser();
     setIsOwnerAuth(activeOwner);
     setCurrentUser(activeUser);
+    const allSaved = activeOwner ? [] : (dbService.getSavedItems(activeUser) || []);
 
     // Segmentasi Notifikasi Berdasarkan Hak Akses:
     // - Pemilik Toko: hanya melihat event operasional toko & backup cloud
@@ -268,22 +268,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-[#0f1115] text-slate-900 dark:text-stone-100 transition-colors duration-200 font-sans">
-      {/* Top Navigation */}
-      <Navbar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={handleToggleTheme}
-        unreadCount={notifications.filter(n => !n.isRead).length}
-        onOpenNotifications={() => setIsNotificationOpen(true)}
-        pendingInquiriesCount={inquiries.filter(i => i.status === 'new').length}
-        currentUser={currentUser}
-        onOpenAuthModal={() => setIsUserAuthModalOpen(true)}
-        onLogoutUser={handleLogoutUser}
-        isOwnerAuth={isOwnerAuth}
-        savedItemsCount={savedItems.length}
-        onOpenSavedItems={() => setIsSavedItemsOpen(true)}
-      />
+      {/* Top Navigation: Dedicated Konsol Pemilik vs Etalase Pelanggan */}
+      {activeTab === 'admin' ? (
+        <OwnerNavbar
+          unreadCount={notifications.filter(n => !n.isRead).length}
+          pendingInquiriesCount={inquiries.filter(i => i.status === 'new').length}
+          onOpenNotifications={() => setIsNotificationOpen(true)}
+          onReturnToStore={handleReturnToStore}
+          onLogoutOwner={handleLogoutOwner}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={handleToggleTheme}
+        />
+      ) : (
+        <Navbar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={handleToggleTheme}
+          unreadCount={notifications.filter(n => !n.isRead).length}
+          onOpenNotifications={() => setIsNotificationOpen(true)}
+          pendingInquiriesCount={inquiries.filter(i => i.status === 'new').length}
+          currentUser={currentUser}
+          onOpenAuthModal={() => setIsUserAuthModalOpen(true)}
+          onLogoutUser={handleLogoutUser}
+          isOwnerAuth={isOwnerAuth}
+          savedItemsCount={savedItems.length}
+          onOpenSavedItems={() => setIsSavedItemsOpen(true)}
+        />
+      )}
 
       {/* Main Content Area with Page Transitions */}
       <main className="flex-1">
@@ -475,11 +487,16 @@ export default function App() {
               ) : currentUser ? (
                 <UserDashboard
                   currentUser={currentUser}
-                  onGoToOrder={() => {
+                  onNavigateToOrder={() => {
                     setActiveTab('order');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   onLogout={handleLogoutUser}
+                  onBrowseCatalog={() => {
+                    setActiveTab('woods');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onOrderSavedItem={handleOrderSavedItem}
                 />
               ) : (
                 <div className="max-w-md mx-auto py-16 px-4 text-center">
@@ -615,23 +632,27 @@ export default function App() {
         }}
       />
 
-      {/* Global Floating Quick Action Button for Direct WhatsApp Inquiry */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
-        <button
-          onClick={() => {
-            setActiveTab('order');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-semibold text-xs shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 cursor-pointer"
-          title="Ajukan Pesanan Cepat"
-        >
-          <MessageSquare className="w-4 h-4 fill-current" />
-          <span className="hidden sm:inline">Pesan via WhatsApp</span>
-        </button>
-      </div>
+      {/* Global Floating Quick Action Button for Direct WhatsApp Inquiry (Customer only) */}
+      {activeTab !== 'admin' && (
+        <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
+          <button
+            onClick={() => {
+              setActiveTab('order');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-semibold text-xs shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 cursor-pointer"
+            title="Ajukan Pesanan Cepat"
+          >
+            <MessageSquare className="w-4 h-4 fill-current" />
+            <span className="hidden sm:inline">Pesan via WhatsApp</span>
+          </button>
+        </div>
+      )}
 
-      {/* Footer */}
-      <Footer onOpenOwnerPortal={handleOpenOwnerPortal} />
+      {/* Footer (Customer / Public only) */}
+      {activeTab !== 'admin' && (
+        <Footer onOpenOwnerPortal={handleOpenOwnerPortal} />
+      )}
     </div>
   );
 }

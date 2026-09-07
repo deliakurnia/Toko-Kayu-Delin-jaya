@@ -147,22 +147,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               );
             })}
 
-            {/* Tersimpan / Wishlist Button */}
-            <button
-              onClick={onOpenSavedItems}
-              className="relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-slate-600 dark:text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/20 flex items-center gap-1.5"
-              title="Lihat barang dan spesimen kayu yang Anda simpan"
-            >
-              <Heart className={`w-3.5 h-3.5 ${savedItemsCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
-              <span>Tersimpan</span>
-              {savedItemsCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-xs animate-in zoom-in">
-                  {savedItemsCount}
-                </span>
-              )}
-            </button>
+            {/* Tersimpan / Wishlist Button - Khusus Pelanggan */}
+            {!isOwnerAuth && (
+              <button
+                onClick={onOpenSavedItems}
+                className="relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-slate-600 dark:text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/20 flex items-center gap-1.5"
+                title="Lihat barang dan spesimen kayu yang Anda simpan"
+              >
+                <Heart className={`w-3.5 h-3.5 ${savedItemsCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>Tersimpan</span>
+                {savedItemsCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-xs animate-in zoom-in">
+                    {savedItemsCount}
+                  </span>
+                )}
+              </button>
+            )}
 
-            {/* Pesanan & Riwayat Saya - KHUSUS PELANGGAN (Disembunyikan saat Sesi Pemilik Aktif demi Privasi) */}
+            {/* Pesanan & Riwayat Saya - KHUSUS PELANGGAN */}
             {!isOwnerAuth && (
               <button
                 onClick={() => {
@@ -187,28 +189,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Separator */}
             <div className="h-5 w-px bg-slate-200 dark:bg-stone-800 mx-1.5" />
 
-            {/* Autentikasi Pengguna vs Sesi Pemilik Toko (STRICT PRIVACY SEPARATION) */}
-            {isOwnerAuth ? (
-              /* SAAT SESI PEMILIK AKTIF: TAMPILKAN HANYA ATELIER OWNER, JANGAN TAMPILKAN PROFIL USER */
-              <button
-                onClick={() => handleTabClick('admin')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                  selectedTab === 'admin'
-                    ? 'bg-amber-950/60 text-amber-300 border-amber-600/80 font-bold shadow-xs ring-1 ring-amber-500/30'
-                    : 'bg-stone-100 dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-400'
-                }`}
-                title="Konsol Pemilik Toko (Atelier) - Sesi Aktif"
-              >
-                <Lock className="w-3.5 h-3.5 text-amber-500" />
-                <span>Atelier Owner</span>
-                {pendingInquiriesCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-stone-950">
-                    {pendingInquiriesCount}
-                  </span>
-                )}
-              </button>
-            ) : currentUser ? (
-              /* SAAT SESI PELANGGAN: TAMPILKAN PROFIL PELANGGAN */
+            {/* Autentikasi Pengguna Pelanggan */}
+            {currentUser ? (
+              /* SAAT SESI PELANGGAN AKTIF: TAMPILKAN PROFIL PELANGGAN */
               <button
                 onClick={() => handleTabClick('user-dashboard')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
@@ -354,32 +337,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Buat Pesanan Baru</span>
             </button>
 
-            {/* Mobile: Akun & Sesi (Strict Separation: Owner vs Customer) */}
+            {/* Mobile: Akun Pemesan (Pelanggan) */}
             <div className="pt-2 border-t border-slate-200 dark:border-stone-800 space-y-1">
-              {isOwnerAuth ? (
-                /* SAAT SESI PEMILIK AKTIF: HANYA TAMPILKAN PANEL ATELIER OWNER */
-                <button
-                  onClick={() => handleTabClick('admin')}
-                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-left text-sm font-bold text-amber-300 bg-amber-950/70 border border-amber-600/70 cursor-pointer shadow-xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-amber-400" />
-                    <span>Panel Atelier Pemilik (Aktif)</span>
-                  </div>
-                  {pendingInquiriesCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-stone-950">
-                      {pendingInquiriesCount}
-                    </span>
-                  )}
-                </button>
-              ) : currentUser ? (
+              {currentUser ? (
                 /* SAAT SESI PELANGGAN AKTIF: TAMPILKAN AKUN PELANGGAN */
                 <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
                   <button
                     onClick={() => handleTabClick('user-dashboard')}
-                    className="flex items-center gap-2 text-sm text-amber-400 font-medium truncate text-left cursor-pointer"
+                    className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 font-medium truncate text-left cursor-pointer"
                   >
-                    <User className="w-4 h-4 text-amber-400 shrink-0" />
+                    <User className="w-4 h-4 text-amber-500 shrink-0" />
                     <span className="truncate">{currentUser.name}</span>
                   </button>
                   <button
@@ -387,7 +354,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onLogoutUser();
                       setMobileMenuOpen(false);
                     }}
-                    className="text-xs text-rose-400 hover:underline shrink-0 ml-2 cursor-pointer"
+                    className="text-xs text-rose-500 hover:underline shrink-0 ml-2 cursor-pointer font-medium"
                   >
                     Keluar
                   </button>

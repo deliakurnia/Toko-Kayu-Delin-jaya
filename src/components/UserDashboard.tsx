@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserAccount, Inquiry, OrderReport, IssueType } from '../types';
+import { UserAccount, Inquiry, OrderReport, IssueType, SavedItem } from '../types';
 import { dbService, OWNER_WHATSAPP_NUMBER } from '../services/dbService';
 import { OrderPdfDocument } from './OrderPdfDocument';
 import { PaymentModal } from './PaymentModal';
@@ -25,22 +25,33 @@ import {
   CreditCard,
   Activity,
   Truck,
-  Lock
+  Lock,
+  Heart,
+  Trash2,
+  MapPin,
+  ShoppingBag,
+  ArrowRight
 } from 'lucide-react';
 
 interface UserDashboardProps {
   currentUser: UserAccount;
   onLogout: () => void;
   onNavigateToOrder: () => void;
+  onBrowseCatalog?: () => void;
+  onOrderSavedItem?: (item: SavedItem) => void;
 }
 
 export const UserDashboard: React.FC<UserDashboardProps> = ({
   currentUser,
   onLogout,
-  onNavigateToOrder
+  onNavigateToOrder,
+  onBrowseCatalog = () => {},
+  onOrderSavedItem
 }) => {
+  const [activeTab, setActiveTab] = useState<'orders' | 'saved' | 'reports' | 'profile'>('orders');
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [reports, setReports] = useState<OrderReport[]>([]);
+  const [userSavedItems, setUserSavedItems] = useState<SavedItem[]>(() => dbService.getSavedItems(currentUser));
   const [selectedPdfInquiry, setSelectedPdfInquiry] = useState<Inquiry | null>(null);
   const [selectedPaymentInquiry, setSelectedPaymentInquiry] = useState<Inquiry | null>(null);
   const [selectedProgressInquiry, setSelectedProgressInquiry] = useState<Inquiry | null>(null);
@@ -66,6 +77,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       r => r.whatsappNumber === currentUser.whatsappNumber || (r.email && r.email.toLowerCase() === currentUser.email.toLowerCase())
     );
     setReports(userReports);
+
+    // Load user's private saved items
+    const saved = dbService.getSavedItems(currentUser);
+    setUserSavedItems(saved);
+  };
+
+  const handleRemoveSavedItem = (referenceId: string) => {
+    const updated = dbService.removeSavedItem(referenceId, currentUser);
+    setUserSavedItems(updated);
   };
 
   useEffect(() => {
@@ -78,6 +98,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
   const handleOpenReport = (inquiry: Inquiry) => {
     setReportingInquiry(inquiry);
+    setActiveTab('reports');
     setIssueType('belum_sampai');
     setReportDescription(`Pesanan saya dengan No. Sesi ${inquiry.sessionNumber || inquiry.inquiryNumber} belum sampai melebihi estimasi waktu. Mohon konfirmasi posisi pengiriman dan ekspedisi.`);
     setReportSuccessMessage(null);
@@ -198,19 +219,82 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </div>
         </div>
 
-        {/* SECTION: PESANAN SAYA (ORDERS LIST) */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
-                <Package className="w-5 h-5 text-amber-400" />
-                Daftar Pesanan &amp; Berkas PDF Sesi Resmi
-              </h2>
-              <p className="text-xs text-stone-400">
-                Setiap pesanan memiliki Nomor Sesi Resmi yang tercantum pada dokumen cetak PDF untuk validasi dan klaim keterlambatan.
-              </p>
+        {/* Navigation Tabs in Customer Dashboard */}
+        <div className="flex flex-wrap gap-2 border-b border-stone-800 pb-3">
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === 'orders'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-stone-900 text-stone-400 hover:text-stone-200 border border-stone-800'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Pesanan &amp; Faktur</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-black/20 text-current">
+              {inquiries.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('saved')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === 'saved'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-stone-900 text-stone-400 hover:text-stone-200 border border-stone-800'
+            }`}
+          >
+            <Heart className="w-4 h-4" />
+            <span>Barang Tersimpan (Wishlist)</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-black/20 text-current">
+              {userSavedItems.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === 'reports'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-stone-900 text-stone-400 hover:text-stone-200 border border-stone-800'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span>Laporan Kendala</span>
+            {reports.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white">
+                {reports.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === 'profile'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-stone-900 text-stone-400 hover:text-stone-200 border border-stone-800'
+            }`}
+          >
+            <User className="w-4 h-4" />
+            <span>Profil Akun &amp; Alamat</span>
+          </button>
+        </div>
+
+        {/* TAB 1: SECTION PESANAN SAYA (ORDERS LIST) */}
+        {activeTab === 'orders' && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-amber-400" />
+                  Daftar Pesanan &amp; Berkas PDF Sesi Resmi
+                </h2>
+                <p className="text-xs text-stone-400">
+                  Setiap pesanan memiliki Nomor Sesi Resmi yang tercantum pada dokumen cetak PDF untuk validasi dan klaim keterlambatan.
+                </p>
+              </div>
             </div>
-          </div>
 
           {inquiries.length === 0 ? (
             <div className="bg-stone-900 border border-dashed border-stone-800 rounded-2xl p-10 text-center space-y-3">
@@ -397,213 +481,435 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             </div>
           )}
         </div>
+        )}
 
-        {/* SECTION: FITUR LAPOR PESANAN (ESCALATION REPORTING FORM / MODAL) */}
-        {reportingInquiry && (
-          <div className="bg-stone-900 border-2 border-rose-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-stone-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-serif font-bold text-lg text-stone-100">
-                    Lapor Kendala Pesanan &amp; Keterlambatan Pengiriman
-                  </h3>
-                  <p className="text-xs text-stone-400">
-                    Jika pesanan belum sampai atau ada kendala, laporkan ke Owner dengan menyertakan Nomor Sesi dan PDF pesanan.
-                  </p>
-                </div>
+        {/* TAB 2: BARANG TERSIMPAN (WISHLIST SAYA) */}
+        {activeTab === 'saved' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+                  Barang Tersimpan (Wishlist Pribadi)
+                </h2>
+                <p className="text-xs text-stone-400">
+                  Koleksi material kayu solid dan mebel custom yang Anda tandai untuk konsultasi atau pemesanan langsung.
+                </p>
               </div>
-
-              <button
-                onClick={() => setReportingInquiry(null)}
-                className="text-stone-400 hover:text-stone-200 text-xs px-2.5 py-1 bg-stone-800 rounded-lg"
-              >
-                Tutup Form
-              </button>
+              {userSavedItems.length > 0 && (
+                <span className="text-xs font-semibold px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full">
+                  {userSavedItems.length} Item Tersimpan
+                </span>
+              )}
             </div>
 
-            {reportSuccessMessage ? (
-              <div className="mt-6 p-5 bg-emerald-950/60 border border-emerald-700/60 rounded-2xl text-xs text-emerald-200 space-y-3">
-                <div className="flex items-center gap-2 font-bold text-sm text-emerald-300">
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span>Laporan Berhasil Diajukan</span>
+            {userSavedItems.length === 0 ? (
+              <div className="bg-stone-900 border border-dashed border-stone-800 rounded-2xl p-12 text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-stone-800/80 border border-stone-700/50 flex items-center justify-center text-stone-400">
+                  <Heart className="w-7 h-7 text-stone-500" />
                 </div>
-                <p>{reportSuccessMessage}</p>
-                <div className="pt-2 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSelectedPdfInquiry(reportingInquiry)}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow transition-colors flex items-center gap-1.5"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Buka / Simpan PDF Pesanan (Sesi {reportingInquiry.sessionNumber})
-                  </button>
-                  <button
-                    onClick={() => setReportingInquiry(null)}
-                    className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-medium rounded-xl transition-colors"
-                  >
-                    Selesai
-                  </button>
+                <div>
+                  <h3 className="text-base font-serif font-bold text-stone-200">Belum Ada Barang Tersimpan</h3>
+                  <p className="text-xs text-stone-400 max-w-md mx-auto mt-1">
+                    Jelajahi etalase spesimen kayu solid nusantara atau mebel custom kami, lalu simpan item yang Anda minati.
+                  </p>
                 </div>
+                {onBrowseCatalog && (
+                  <button
+                    onClick={onBrowseCatalog}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow-lg transition-colors cursor-pointer"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Jelajahi Katalog Kayu</span>
+                  </button>
+                )}
               </div>
             ) : (
-              <form onSubmit={handleSubmitReport} className="mt-6 space-y-4">
-                {reportErrorMessage && (
-                  <div className="p-3 bg-rose-950/50 border border-rose-800 rounded-xl text-xs text-rose-200">
-                    {reportErrorMessage}
-                  </div>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {userSavedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group bg-stone-900/90 border border-stone-800 hover:border-amber-500/40 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                  >
+                    <div className="flex gap-3">
+                      <div className="w-20 h-20 rounded-xl bg-stone-800 overflow-hidden flex-shrink-0 border border-stone-700/60">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?auto=format&fit=crop&w=400&q=80';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-500 text-xs">
+                            Material
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-stone-800 text-amber-400 border border-stone-700/60">
+                            {item.itemType === 'wood' ? 'Spesimen Kayu' : 'Mebel Custom'}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveSavedItem(item.referenceId || item.id)}
+                            className="text-stone-500 hover:text-rose-400 p-1 transition-colors cursor-pointer"
+                            title="Hapus dari tersimpan"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <h4 className="font-serif font-bold text-stone-100 text-sm mt-1 truncate">
+                          {item.name}
+                        </h4>
+                        {item.subtitle && (
+                          <p className="text-[11px] text-stone-500 truncate italic">
+                            {item.subtitle}
+                          </p>
+                        )}
+                        <p className="text-xs font-semibold text-amber-300 mt-0.5">
+                          {item.priceEstimate || 'Harga Terbuka'}
+                        </p>
+                      </div>
+                    </div>
 
-                {/* Target Order Info */}
-                <div className="p-4 bg-stone-950/60 rounded-xl border border-stone-800 text-xs grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <span className="text-stone-500">Nomor Sesi Resmi:</span>
-                    <p className="font-mono font-bold text-amber-400 text-sm mt-0.5">
-                      {reportingInquiry.sessionNumber || reportingInquiry.inquiryNumber}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-stone-500">Material &amp; Dimensi:</span>
-                    <p className="text-stone-200 font-medium mt-0.5">
-                      {reportingInquiry.woodTypeName} ({reportingInquiry.sizeEstimate || '-'})
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-stone-500">Pemesan &amp; Tujuan:</span>
-                    <p className="text-stone-200 mt-0.5">
-                      {reportingInquiry.customerName} - {reportingInquiry.city}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-300 mb-1.5">
-                      Kategori Kendala Pesanan <span className="text-rose-400">*</span>
-                    </label>
-                    <select
-                      value={issueType}
-                      onChange={(e) => setIssueType(e.target.value as IssueType)}
-                      className="w-full px-3 py-2.5 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-100 focus:outline-none focus:border-rose-500"
-                    >
-                      <option value="belum_sampai">Pesanan Belum Sampai Melebihi Jadwal Estimasi</option>
-                      <option value="keterlambatan_ekspedisi">Keterlambatan Ekspedisi / Kendala Truk Kargo</option>
-                      <option value="status_stuck">Status Pengerjaan Berhenti / Tidak Ada Kabar</option>
-                      <option value="kerusakan">Klaim Kerusakan Barang Saat Transit</option>
-                      <option value="lainnya">Kendala Pesanan Lainnya</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-300 mb-1.5 flex items-center justify-between">
-                      <span>Lampiran Berkas PDF Pesanan</span>
-                      <span className="text-[10px] text-amber-400">Otomatis Terlampir</span>
-                    </label>
-                    <div className="flex items-center gap-2 p-2.5 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-300">
-                      <FileText className="w-4 h-4 text-amber-400" />
-                      <span className="truncate">Dokumen_SPK_{reportingInquiry.sessionNumber}.pdf</span>
+                    <div className="mt-4 pt-3 border-t border-stone-800/80 flex items-center gap-2">
                       <button
-                        type="button"
-                        onClick={() => setSelectedPdfInquiry(reportingInquiry)}
-                        className="ml-auto text-[11px] text-amber-400 hover:underline font-semibold"
+                        onClick={() => handleRemoveSavedItem(item.referenceId || item.id)}
+                        className="px-3 py-2 bg-stone-800/80 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-xs font-medium rounded-xl border border-stone-700/50 transition-colors cursor-pointer"
                       >
-                        Pratinjau PDF
+                        Hapus
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (onOrderSavedItem) {
+                            onOrderSavedItem(item);
+                          } else if (onBrowseCatalog) {
+                            onBrowseCatalog();
+                          }
+                        }}
+                        className="flex-1 py-2 px-3 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>Pesan Sekarang</span>
                       </button>
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-300 mb-1.5">
-                    Keterangan Rinci Kendala <span className="text-rose-400">*</span>
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={reportDescription}
-                    onChange={(e) => setReportDescription(e.target.value)}
-                    placeholder="Jelaskan kendala Anda secara lengkap. Sebutkan tanggal jatuh tempo kesepakatan jika ada."
-                    className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-rose-500"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    Laporan akan langsung diteruskan ke WhatsApp Owner &amp; masuk antrean prioritas tim workshop.
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setReportingInquiry(null)}
-                      className="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-medium rounded-xl transition-colors"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmittingReport}
-                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
-                    >
-                      <Send className="w-4 h-4" />
-                      {isSubmittingReport ? 'Mengirim...' : 'Kirim Laporan ke Owner'}
-                    </button>
-                  </div>
-                </div>
-              </form>
+                ))}
+              </div>
             )}
           </div>
         )}
 
-        {/* SECTION: RIWAYAT LAPORAN SAYA */}
-        {reports.length > 0 && (
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
-            <h3 className="text-base font-serif font-bold text-stone-100 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              Riwayat Laporan Kendala Pesanan Anda
-            </h3>
+        {/* TAB 3: PUSAT BANTUAN & LAPORAN KENDALA */}
+        {activeTab === 'reports' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-rose-400" />
+                  Pusat Bantuan &amp; Laporan Kendala Pesanan
+                </h2>
+                <p className="text-xs text-stone-400">
+                  Laporkan keterlambatan pengiriman kargo, kendala pengerjaan workshop, atau klaim garansi kayu.
+                </p>
+              </div>
+            </div>
 
-            <div className="space-y-3">
-              {reports.map((report) => (
-                <div
-                  key={report.id}
-                  className="p-4 bg-stone-950/60 border border-stone-800 rounded-xl text-xs space-y-2"
-                >
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-rose-400">{report.reportNumber}</span>
-                      <span className="text-stone-500">•</span>
-                      <span className="font-mono text-stone-300">Sesi: {report.sessionNumber}</span>
+            {/* FORM LAPOR KENDALA (ESCALATION REPORTING FORM / MODAL) */}
+            {reportingInquiry ? (
+              <div className="bg-stone-900 border-2 border-rose-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+                <div className="flex items-start justify-between gap-4 pb-4 border-b border-stone-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                      <AlertTriangle className="w-5 h-5" />
                     </div>
-
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      report.status === 'resolved' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/50' :
-                      report.status === 'investigating' ? 'bg-blue-950 text-blue-300 border border-blue-800/50' :
-                      'bg-amber-950 text-amber-300 border border-amber-800/50'
-                    }`}>
-                      {report.status === 'resolved' ? 'Terselesaikan' :
-                       report.status === 'investigating' ? 'Sedang Ditindaklanjuti Owner' :
-                       'Menunggu Respon Owner'}
-                    </span>
+                    <div>
+                      <h3 className="font-serif font-bold text-lg text-stone-100">
+                        Lapor Kendala Pesanan &amp; Keterlambatan Pengiriman
+                      </h3>
+                      <p className="text-xs text-stone-400">
+                        Laporkan ke Owner dengan menyertakan Nomor Sesi dan PDF pesanan resmi.
+                      </p>
+                    </div>
                   </div>
 
-                  <p className="text-stone-300 italic">"{report.description}"</p>
+                  <button
+                    onClick={() => setReportingInquiry(null)}
+                    className="text-stone-400 hover:text-stone-200 text-xs px-2.5 py-1 bg-stone-800 rounded-lg cursor-pointer"
+                  >
+                    Tutup Form
+                  </button>
+                </div>
 
-                  {report.resolutionNote && (
-                    <div className="mt-2 p-2.5 bg-amber-950/30 border border-amber-800/30 rounded-lg text-amber-200 text-[11px]">
-                      <strong>Respon Pemilik / Workshop:</strong> {report.resolutionNote}
+                {reportSuccessMessage ? (
+                  <div className="mt-6 p-5 bg-emerald-950/60 border border-emerald-700/60 rounded-2xl text-xs text-emerald-200 space-y-3">
+                    <div className="flex items-center gap-2 font-bold text-sm text-emerald-300">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Laporan Berhasil Diajukan</span>
                     </div>
-                  )}
+                    <p>{reportSuccessMessage}</p>
+                    <div className="pt-2 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSelectedPdfInquiry(reportingInquiry)}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Buka / Simpan PDF Pesanan (Sesi {reportingInquiry.sessionNumber})
+                      </button>
+                      <button
+                        onClick={() => setReportingInquiry(null)}
+                        className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-medium rounded-xl transition-colors cursor-pointer"
+                      >
+                        Selesai
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitReport} className="mt-6 space-y-4">
+                    {reportErrorMessage && (
+                      <div className="p-3 bg-rose-950/50 border border-rose-800 rounded-xl text-xs text-rose-200">
+                        {reportErrorMessage}
+                      </div>
+                    )}
 
-                  <div className="text-[10px] text-stone-500 pt-1">
-                    Diajukan pada: {new Date(report.createdAt).toLocaleDateString('id-ID', {
-                      day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                    })}
+                    {/* Target Order Info */}
+                    <div className="p-4 bg-stone-950/60 rounded-xl border border-stone-800 text-xs grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <span className="text-stone-500">Nomor Sesi Resmi:</span>
+                        <p className="font-mono font-bold text-amber-400 text-sm mt-0.5">
+                          {reportingInquiry.sessionNumber || reportingInquiry.inquiryNumber}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-stone-500">Material &amp; Dimensi:</span>
+                        <p className="text-stone-200 font-medium mt-0.5">
+                          {reportingInquiry.woodTypeName} ({reportingInquiry.sizeEstimate || '-'})
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-stone-500">Pemesan &amp; Tujuan:</span>
+                        <p className="text-stone-200 mt-0.5">
+                          {reportingInquiry.customerName} - {reportingInquiry.city}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-stone-300 mb-1.5">
+                          Kategori Kendala Pesanan <span className="text-rose-400">*</span>
+                        </label>
+                        <select
+                          value={issueType}
+                          onChange={(e) => setIssueType(e.target.value as IssueType)}
+                          className="w-full px-3 py-2.5 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-100 focus:outline-none focus:border-rose-500"
+                        >
+                          <option value="belum_sampai">Pesanan Belum Sampai Melebihi Jadwal Estimasi</option>
+                          <option value="keterlambatan_ekspedisi">Keterlambatan Ekspedisi / Kendala Truk Kargo</option>
+                          <option value="status_stuck">Status Pengerjaan Berhenti / Tidak Ada Kabar</option>
+                          <option value="kerusakan">Klaim Kerusakan Barang Saat Transit</option>
+                          <option value="lainnya">Kendala Pesanan Lainnya</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-stone-300 mb-1.5 flex items-center justify-between">
+                          <span>Lampiran Berkas PDF Pesanan</span>
+                          <span className="text-[10px] text-amber-400">Otomatis Terlampir</span>
+                        </label>
+                        <div className="flex items-center gap-2 p-2.5 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-300">
+                          <FileText className="w-4 h-4 text-amber-400" />
+                          <span className="truncate">Dokumen_SPK_{reportingInquiry.sessionNumber}.pdf</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedPdfInquiry(reportingInquiry)}
+                            className="ml-auto text-[11px] text-amber-400 hover:underline font-semibold cursor-pointer"
+                          >
+                            Pratinjau PDF
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-300 mb-1.5">
+                        Keterangan Rinci Kendala <span className="text-rose-400">*</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={reportDescription}
+                        onChange={(e) => setReportDescription(e.target.value)}
+                        placeholder="Jelaskan kendala Anda secara lengkap. Sebutkan tanggal jatuh tempo kesepakatan jika ada."
+                        className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                      <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        Laporan akan langsung diteruskan ke WhatsApp Owner &amp; masuk antrean prioritas tim workshop.
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setReportingInquiry(null)}
+                          className="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-medium rounded-xl transition-colors cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSubmittingReport}
+                          className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          <Send className="w-4 h-4" />
+                          {isSubmittingReport ? 'Mengirim...' : 'Kirim Laporan ke Owner'}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-stone-200 text-sm">
+                      Cara Mengajukan Laporan Kendala
+                    </h4>
+                    <p className="text-xs text-stone-400 mt-0.5">
+                      Untuk mengajukan laporan, buka tab <button onClick={() => setActiveTab('orders')} className="text-amber-400 underline font-semibold cursor-pointer">Pesanan &amp; Faktur</button> lalu klik tombol <strong>"Lapor Kendala"</strong> pada pesanan yang ingin Anda eskalasikan.
+                    </p>
                   </div>
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* RIWAYAT LAPORAN SAYA */}
+            {reports.length > 0 ? (
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+                <h3 className="text-base font-serif font-bold text-stone-100 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                  Riwayat Laporan Kendala Pesanan Anda
+                </h3>
+
+                <div className="space-y-3">
+                  {reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="p-4 bg-stone-950/60 border border-stone-800 rounded-xl text-xs space-y-2"
+                    >
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-rose-400">{report.reportNumber}</span>
+                          <span className="text-stone-500">•</span>
+                          <span className="font-mono text-stone-300">Sesi: {report.sessionNumber}</span>
+                        </div>
+
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          report.status === 'resolved' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/50' :
+                          report.status === 'investigating' ? 'bg-blue-950 text-blue-300 border border-blue-800/50' :
+                          'bg-amber-950 text-amber-300 border border-amber-800/50'
+                        }`}>
+                          {report.status === 'resolved' ? 'Terselesaikan' :
+                           report.status === 'investigating' ? 'Sedang Ditindaklanjuti Owner' :
+                           'Menunggu Respon Owner'}
+                        </span>
+                      </div>
+
+                      <p className="text-stone-300 italic">"{report.description}"</p>
+
+                      {report.resolutionNote && (
+                        <div className="mt-2 p-2.5 bg-amber-950/30 border border-amber-800/30 rounded-lg text-amber-200 text-[11px]">
+                          <strong>Respon Pemilik / Workshop:</strong> {report.resolutionNote}
+                        </div>
+                      )}
+
+                      <div className="text-[10px] text-stone-500 pt-1">
+                        Diajukan pada: {new Date(report.createdAt).toLocaleDateString('id-ID', {
+                          day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-stone-900/60 border border-dashed border-stone-800/80 rounded-2xl p-8 text-center text-xs text-stone-500">
+                Tidak ada laporan kendala aktif. Semua pesanan Anda berjalan lancar.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: PROFIL AKUN & ALAMAT PENGIRIMAN */}
+        {activeTab === 'profile' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-serif font-bold text-stone-100 flex items-center gap-2">
+                  <User className="w-5 h-5 text-amber-400" />
+                  Profil Akun &amp; Pengaturan Pengiriman
+                </h2>
+                <p className="text-xs text-stone-400">
+                  Data kontak pribadi dan alamat pengiriman kargo terverifikasi Toko Delin Jaya.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Account Info Card */}
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+                <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  Informasi Identitas Pelanggan
+                </h3>
+                <div className="space-y-3 text-xs">
+                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                    <span className="text-stone-500 block">Nama Lengkap:</span>
+                    <span className="text-stone-200 font-semibold text-sm">{currentUser.name}</span>
+                  </div>
+                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                    <span className="text-stone-500 block">Nomor WhatsApp Aktif:</span>
+                    <span className="text-stone-200 font-mono font-semibold">{currentUser.phone}</span>
+                  </div>
+                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                    <span className="text-stone-500 block">Status Akun:</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Terverifikasi Pelanggan Delin Jaya
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Address Card */}
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-4">
+                <h3 className="font-serif font-bold text-stone-200 text-sm flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-amber-400" />
+                  Alamat Pengiriman Utama
+                </h3>
+                <div className="space-y-3 text-xs">
+                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                    <span className="text-stone-500 block">Kota / Wilayah Tujuan:</span>
+                    <span className="text-stone-200 font-semibold">{currentUser.city || 'Belum ditentukan'}</span>
+                  </div>
+                  <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/60">
+                    <span className="text-stone-500 block">Alamat Lengkap Kargo:</span>
+                    <p className="text-stone-300 mt-1 leading-relaxed">
+                      {currentUser.address || 'Alamat otomatis tersimpan saat Anda membuat pesanan kargo pertama kali.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

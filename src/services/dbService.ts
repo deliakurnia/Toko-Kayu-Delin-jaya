@@ -1574,22 +1574,52 @@ class DatabaseService {
   // ==========================================
   // SAVED ITEMS / WISHLIST (FITUR PRIVAT USER)
   // ==========================================
-  public getSavedItems(): SavedItem[] {
+  private getSavedStorageKey(user?: UserAccount | null): string {
+    const activeUser = user !== undefined ? user : this.getCurrentUser();
+    if (!activeUser) {
+      return `${STORAGE_KEYS.SAVED_ITEMS}_guest`;
+    }
+    return `${STORAGE_KEYS.SAVED_ITEMS}_${activeUser.id || activeUser.email}`;
+  }
+
+  public getSavedItems(user?: UserAccount | null): SavedItem[] {
+    // STRICT PRIVACY RULE: Sesi Pemilik Toko (Owner) TIDAK berbelanja dan TIDAK boleh melihat wishlist milik pelanggan!
+    if (this.isOwnerAuthenticated()) {
+      return [];
+    }
     try {
-      const data = localStorage.getItem(STORAGE_KEYS.SAVED_ITEMS);
+      const key = this.getSavedStorageKey(user);
+      let data = localStorage.getItem(key);
+
+      // Migrasi data lama dari STORAGE_KEYS.SAVED_ITEMS jika ada
+      if (!data) {
+        const legacy = localStorage.getItem(STORAGE_KEYS.SAVED_ITEMS);
+        if (legacy) {
+          data = legacy;
+          localStorage.setItem(key, legacy);
+          localStorage.removeItem(STORAGE_KEYS.SAVED_ITEMS);
+        }
+      }
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
     }
   }
 
-  public isItemSaved(referenceId: string): boolean {
-    const items = this.getSavedItems();
+  public isItemSaved(referenceId: string, user?: UserAccount | null): boolean {
+    if (this.isOwnerAuthenticated()) return false;
+    const items = this.getSavedItems(user);
     return items.some(i => i.referenceId === referenceId || i.id === referenceId);
   }
 
-  public toggleSaveItem(item: Omit<SavedItem, 'savedAt' | 'id'>): { isSaved: boolean; items: SavedItem[] } {
-    const items = this.getSavedItems();
+  public toggleSaveItem(item: Omit<SavedItem, 'savedAt' | 'id'>, user?: UserAccount | null): { isSaved: boolean; items: SavedItem[] } {
+    // Owner tidak berbelanja dan tidak menyimpan wishlist
+    if (this.isOwnerAuthenticated()) {
+      return { isSaved: false, items: [] };
+    }
+
+    const key = this.getSavedStorageKey(user);
+    const items = this.getSavedItems(user);
     const index = items.findIndex(i => i.referenceId === item.referenceId);
     let isSaved = false;
 
@@ -1606,14 +1636,16 @@ class DatabaseService {
       isSaved = true;
     }
 
-    localStorage.setItem(STORAGE_KEYS.SAVED_ITEMS, JSON.stringify(items));
+    localStorage.setItem(key, JSON.stringify(items));
     this.notify('SAVED_ITEMS_CHANGED', items);
     return { isSaved, items };
   }
 
-  public removeSavedItem(referenceId: string): SavedItem[] {
-    const items = this.getSavedItems().filter(i => i.referenceId !== referenceId && i.id !== referenceId);
-    localStorage.setItem(STORAGE_KEYS.SAVED_ITEMS, JSON.stringify(items));
+  public removeSavedItem(referenceId: string, user?: UserAccount | null): SavedItem[] {
+    if (this.isOwnerAuthenticated()) return [];
+    const key = this.getSavedStorageKey(user);
+    const items = this.getSavedItems(user).filter(i => i.referenceId !== referenceId && i.id !== referenceId);
+    localStorage.setItem(key, JSON.stringify(items));
     this.notify('SAVED_ITEMS_CHANGED', items);
     return items;
   }
