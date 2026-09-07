@@ -1,0 +1,455 @@
+{
+  "woods": [
+    {
+      "id": "66d8e101a1f0a2001e3b0001",
+      "name": "Kayu Jati (Teak Wood)",
+      "botanicalName": "Tectona grandis",
+      "slug": "jati",
+      "description": "Raja kayu Nusantara dari hutan Perhutani Jawa. Kaya akan minyak alami yang membuatnya kebal terhadap rayap, jamur, dan cuaca tropis.",
+      "characteristics": {
+        "kekerasan": "1.155 lbf",
+        "warna": "Cokelat keemasan",
+        "ketahanan": "Kelas Awet I",
+        "kadarAir": "10% - 12%",
+        "massaJenis": "670 - 750 kg/m³",
+        "kegunaan": [
+          "Meja Solid Slab",
+          "Kusen \u0026 Pintu Utama",
+          "Lantai Kayu Parquet"
+        ]
+      },
+      "images": [
+        "/uploads/woods/wood_66d8e101a1f0a2001e3b0001_1788761519_5a3bafe5.png"
+      ],
+      "priceRangeEstimate": "Rp 18.000.000 - Rp 35.000.000 / m³",
+      "origin": "Jawa Tengah \u0026 Jawa Timur (Hutan Perhutani)",
+      "textureColorHex": "#9e6738",
+      "roughness": 0.65,
+      "metalness": 0.05,
+      "isActive": true,
+      "stockStatus": "ready",
+      "stockVolumeM3": 18,
+      "stockSlabsCount": 11,
+      "restockEstimate": "Siap Kirim (Gudang Jepara)",
+      "lastStockUpdate": "2026-09-07T13:46:51.4236027+07:00",
+      "createdAt": "2026-09-07T08:04:13.822624+07:00"
+    },
+    {
+      "id": "66d8e101a1f0a2001e3b0002",
+      "name": "Kayu Eboni Makassar",
+      "botanicalName": "Diospyros celebica",
+      "slug": "eboni",
+      "description": "Kayu mewah eksotis endemik Sulawesi. Memiliki serat dramatis corak hitam pekat dengan strip kemerahan cokelat tua.",
+      "characteristics": {
+        "kekerasan": "3.220 lbf",
+        "warna": "Hitam pekat eksotis",
+        "ketahanan": "Kelas Awet I",
+        "kadarAir": "8% - 11%",
+        "massaJenis": "1.050 - 1.200 kg/m³",
+        "kegunaan": [
+          "Koleksi Karya Seni",
+          "Buffet \u0026 Credenza Sultan"
+        ]
+      },
+      "images": [
+        "/uploads/woods/wood_66d8e101a1f0a2001e3b0002_1788762383_93d36462.png"
+      ],
+      "priceRangeEstimate": "Rp 65.000.000 - Rp 120.000.000 / m³",
+      "origin": "Sulawesi Tengah \u0026 Selatan",
+      "textureColorHex": "#2b1d14",
+      "roughness": 0.45,
+      "metalness": 0.1,
+      "isActive": true,
+      "stockStatus": "out_of_stock",
+      "stockVolumeM3": 0,
+      "stockSlabsCount": 0,
+      "restockEstimate": "Menunggu Log Masuk dari Palu (3-4 Minggu)",
+      "lastStockUpdate": "2026-09-07T13:26:23.1729763+07:00",
+      "createdAt": "2026-09-07T08:04:13.822624+07:00"
+    },
+    {
+      "id": "66d8e101a1f0a2001e3b0003",
+      "name": "Kayu Sonokeling (Rosewood)",
+      "botanicalName": "Dalbergia latifolia",
+      "slug": "sonokeling",
+      "description": "Kayu eksotis dengan pola serat ungu kehitaman bertekstur sangat halus. Sangat populer untuk furniture mewah dan alat musik akustik.",
+      "characteristics": {
+        "kekerasan": "1.780 lbf",
+        "warna": "Cokelat keunguan",
+        "ketahanan": "Kelas Awet I",
+        "kadarAir": "9% - 12%",
+        "massaJenis": "750 - 850 kg/m³",
+        "kegunaan": [
+          "Meja Konsol",
+          "Gitar \u0026 Akustik"
+        ]
+      },
+      "images": null,
+      "priceRangeEstimate": "Rp 32.000.000 - Rp 55.000.000 / m³",
+      "origin": "Jawa Tengah \u0026 Jawa Timur",
+      "textureColorHex": "#3d2b24",
+      "roughness": 0.5,
+      "metalness": 0.05,
+      "isActive": true,
+      "stockStatus": "ready",
+      "stockVolumeM3": 9,
+      "stockSlabsCount": 8,
+      "restockEstimate": "Siap Kirim (Gudang Blora)",
+      "lastStockUpdate": "2026-09-07T08:00:00Z",
+      "createdAt": "2026-09-07T08:04:13.822624+07:00"
+    },
+    {
+      "id": "66d8e101a1f0a2001e3b0004",
+      "name": "Kayu Gaharu (Agarwood)",
+      "botanicalName": "Aquilaria malaccensis",
+      "slug": "gaharu",
+      "description": "Kayu beraroma surgawi dengan kandungan resin wangi khas. Simbol prestise tinggi untuk dupa mewah, ukiran pusaka, dan ornamen eksklusif.",
+      "characteristics": {
+        "kekerasan": "890 lbf",
+        "warna": "Cokelat damar",
+        "ketahanan": "Kelas Awet II",
+        "kadarAir": "12% - 14%",
+        "massaJenis": "550 - 650 kg/m³",
+        "kegunaan": [
+          "Ornamen Sakral",
+          "Dupa Mewah",
+          "Ukiran Kolektor"
+        ]
+      },
+      "images": null,
+      "priceRangeEstimate": "Rp 80.000.000 - Rp 250.000.000 / kg (Grade Super)",
+      "origin": "Kalimantan \u0026 Sumatera",
+      "textureColorHex": "#4a3928",
+      "roughness": 0.7,
+      "metalness": 0.02,
+      "isActive": true,
+      "stockStatus": "low_stock",
+      "stockVolumeM3": 1,
+      "stockSlabsCount": 1,
+      "restockEstimate": "Proses Oven Kiln-Dry (2–3 Minggu)",
+      "lastStockUpdate": "2026-09-07T15:23:16.2986142+07:00",
+      "createdAt": "2026-09-07T08:04:13.822624+07:00"
+    }
+  ],
+  "categories": [
+    {
+      "id": "6a9e0d8db237d405f7212973",
+      "name": "Meja Makan \u0026 Meja Kerja",
+      "slug": "meja",
+      "description": "Meja solid slab utuh tanpa sambungan atau desain ergonomis minimalis modern.",
+      "referenceImages": null,
+      "typicalDimensions": "180 x 90 x 75 cm / 240 x 100 x 75 cm",
+      "estimatedCraftTime": "2-4 Minggu",
+      "isActive": true
+    },
+    {
+      "id": "6a9e0d8db237d405f7212974",
+      "name": "Lemari \u0026 Wardrobe",
+      "slug": "lemari",
+      "description": "Penyimpanan pakaian dan dokumen dengan sistem engsel soft-close dan konstruksi purus kokoh.",
+      "referenceImages": null,
+      "typicalDimensions": "120 x 60 x 200 cm",
+      "estimatedCraftTime": "3-5 Minggu",
+      "isActive": true
+    },
+    {
+      "id": "6a9e0d8db237d405f7212975",
+      "name": "Buffet \u0026 Credenza TV",
+      "slug": "buffet",
+      "description": "Kabinet audio visual minimalis dengan kisi-kisi kayu estetik dan aksen kuningan.",
+      "referenceImages": null,
+      "typicalDimensions": "180 x 45 x 65 cm",
+      "estimatedCraftTime": "2-3 Minggu",
+      "isActive": true
+    },
+    {
+      "id": "6a9e0d8db237d405f7212976",
+      "name": "Bangku \u0026 Kursi Santai",
+      "slug": "bangku",
+      "description": "Kursi lounge santai berkontur alami kayu solid dengan bantalan linen premium.",
+      "referenceImages": null,
+      "typicalDimensions": "65 x 75 x 78 cm",
+      "estimatedCraftTime": "1-2 Minggu",
+      "isActive": true
+    }
+  ],
+  "customers": [
+    {
+      "id": "6a9e0d8db237d405f7212977",
+      "whatsappNumber": "6281298765432",
+      "name": "Budi Hartono",
+      "city": "Jakarta Selatan",
+      "email": "budi.hartono@example.com",
+      "totalOrders": 5,
+      "isLoyalCustomer": true,
+      "firstOrderAt": "2026-06-07T08:04:13.822624+07:00",
+      "lastOrderAt": "2026-09-07T08:20:20.479799+07:00",
+      "notes": "Kolektor mebel jati tua, preferens solid slab tanpa dempul"
+    },
+    {
+      "id": "6a9e0d8db237d405f7212978",
+      "whatsappNumber": "6285712345678",
+      "name": "Siti Rahmawati",
+      "city": "Surabaya",
+      "email": "siti.rahma@studioarsitek.id",
+      "totalOrders": 2,
+      "isLoyalCustomer": true,
+      "firstOrderAt": "2026-07-07T08:04:13.822624+07:00",
+      "lastOrderAt": "2026-08-18T08:04:13.822624+07:00",
+      "notes": "Prinsipal Studio Arsitek, rutin order material kayu sonokeling untuk proyek villa"
+    },
+    {
+      "id": "6a9e5ddbb6d5923f59f548ab",
+      "whatsappNumber": "6281234567890",
+      "name": "Budi Hartono",
+      "city": "Jakarta Selatan",
+      "email": "budi.hartono@example.com",
+      "totalOrders": 1,
+      "isLoyalCustomer": false,
+      "firstOrderAt": "2026-09-07T13:46:51.3762724+07:00",
+      "lastOrderAt": "2026-09-07T13:46:51.3762724+07:00"
+    },
+    {
+      "id": "6a9e5e09b6d5923f59f548ae",
+      "whatsappNumber": "6281987654321",
+      "name": "Sultan Andara",
+      "city": "Surabaya",
+      "email": "sultan@example.com",
+      "totalOrders": 1,
+      "isLoyalCustomer": false,
+      "firstOrderAt": "2026-09-07T13:47:37.4545101+07:00",
+      "lastOrderAt": "2026-09-07T13:47:37.4545101+07:00"
+    },
+    {
+      "id": "6a9e7474e16190e1e8e5722c",
+      "whatsappNumber": "628111919204",
+      "name": "Gino Putra Widana",
+      "city": "Jakarta Selatan",
+      "email": "widanasgpw4@gmail.com",
+      "totalOrders": 1,
+      "isLoyalCustomer": false,
+      "firstOrderAt": "2026-09-07T15:23:16.2330293+07:00",
+      "lastOrderAt": "2026-09-07T15:23:16.2330293+07:00"
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "6a9e7474e16190e1e8e5722d",
+      "inquiryNumber": "INQ-20260907-300",
+      "customerId": "6a9e7474e16190e1e8e5722c",
+      "customerName": "Gino Putra Widana",
+      "whatsappNumber": "628111919204",
+      "city": "Jakarta Selatan",
+      "email": "widanasgpw4@gmail.com",
+      "orderType": "raw_wood",
+      "woodTypeId": "66d8e101a1f0a2001e3b0004",
+      "woodTypeName": "Gaharu (Agarwood)",
+      "sizeEstimate": "200x30x14cm (5 batang)",
+      "referenceNote": "-",
+      "status": "new",
+      "isRepeatCustomer": false,
+      "repeatOrderCount": 1,
+      "sessionNumber": "SES-20260907-6521",
+      "createdAt": "2026-09-07T15:23:16.2330293+07:00",
+      "updatedAt": "2026-09-07T15:23:16.2330293+07:00"
+    },
+    {
+      "id": "6a9e5e09b6d5923f59f548af",
+      "inquiryNumber": "INQ-20260907-100",
+      "customerId": "6a9e5e09b6d5923f59f548ae",
+      "customerName": "Sultan Andara",
+      "whatsappNumber": "6281987654321",
+      "city": "Surabaya",
+      "email": "sultan@example.com",
+      "orderType": "raw_wood",
+      "woodTypeId": "66d8e101a1f0a2001e3b0002",
+      "woodTypeName": "Kayu Eboni Makassar",
+      "sizeEstimate": "Panjang 250cm x Lebar 80cm",
+      "referenceNote": "Saya butuh 2 slab eboni hitam pekat untuk meja kerja",
+      "status": "pre_order",
+      "isRepeatCustomer": false,
+      "repeatOrderCount": 1,
+      "sessionNumber": "SES-1788763657-0100",
+      "createdAt": "2026-09-07T13:47:37.4545101+07:00",
+      "updatedAt": "2026-09-07T13:47:37.4545101+07:00"
+    },
+    {
+      "id": "6a9e5ddbb6d5923f59f548ac",
+      "inquiryNumber": "INQ-20260907-400",
+      "customerId": "6a9e5ddbb6d5923f59f548ab",
+      "customerName": "Budi Hartono",
+      "whatsappNumber": "6281234567890",
+      "city": "Jakarta Selatan",
+      "email": "budi.hartono@example.com",
+      "orderType": "raw_wood",
+      "woodTypeId": "66d8e101a1f0a2001e3b0001",
+      "woodTypeName": "Kayu Jati",
+      "sizeEstimate": "Panjang 300cm x Lebar 100cm",
+      "referenceNote": "Uji Coba Reservasi Atomik Bebas Race Condition",
+      "status": "new",
+      "isRepeatCustomer": false,
+      "repeatOrderCount": 1,
+      "sessionNumber": "SES-1788763611-0400",
+      "createdAt": "2026-09-07T13:46:51.3762724+07:00",
+      "updatedAt": "2026-09-07T13:46:51.3762724+07:00"
+    },
+    {
+      "id": "6a9e1154b25db2cc92a0d46f",
+      "inquiryNumber": "INQ-20260907-000",
+      "customerId": "6a9e0d8db237d405f7212977",
+      "customerName": "Budi Hartono",
+      "whatsappNumber": "6281298765432",
+      "city": "Jakarta Selatan",
+      "email": "budi.hartono@example.com",
+      "orderType": "custom_furniture",
+      "woodTypeId": "66d8f201b1f0a2001e3c0001",
+      "woodTypeName": "Kayu Jati (Teak Wood)",
+      "categoryName": "Meja Makan Solid Slab",
+      "sizeEstimate": "200 x 100 x 75 cm",
+      "referenceNote": "Kayu jati tua grade A perhutani, solid slab tanpa sambungan dempul",
+      "status": "new",
+      "isRepeatCustomer": true,
+      "repeatOrderCount": 5,
+      "sessionNumber": "SES-20260907-8891",
+      "createdAt": "2026-09-07T08:20:20.479799+07:00",
+      "updatedAt": "2026-09-07T08:20:20.479799+07:00"
+    },
+    {
+      "id": "6a9e0d97b237d405f7212979",
+      "inquiryNumber": "INQ-20260907-700",
+      "customerId": "6a9e0d8db237d405f7212977",
+      "customerName": "Budi Hartono",
+      "whatsappNumber": "6281298765432",
+      "city": "Jakarta Selatan",
+      "orderType": "custom_furniture",
+      "woodTypeId": "66d8f201b1f0a2001e3c0001",
+      "woodTypeName": "Kayu Jati (Teak Wood)",
+      "categoryName": "Meja Makan",
+      "sizeEstimate": "200x100x75cm",
+      "referenceNote": "Slab utuh tanpa sambungan",
+      "status": "processing",
+      "isRepeatCustomer": true,
+      "repeatOrderCount": 4,
+      "sessionNumber": "SES-1788743063-0700",
+      "createdAt": "2026-09-07T08:04:23.6751587+07:00",
+      "updatedAt": "2026-09-07T08:04:28.757096+07:00"
+    }
+  ],
+  "reports": [],
+  "backups": [
+    {
+      "id": "6a9e1766b25db2cc92a0d473",
+      "filename": "kayu-nusantara-backup-2026-09-07-084614.json",
+      "totalInquiries": 1,
+      "totalCustomers": 1,
+      "totalReports": 0,
+      "sizeKb": 1,
+      "checksum": "sha256-b582a16bebdc",
+      "autoScheduled": false,
+      "createdAt": "2026-09-07T08:46:14.542686+07:00"
+    },
+    {
+      "id": "6a9e115bb25db2cc92a0d471",
+      "filename": "kayu-nusantara-backup-2026-09-07-082027.json",
+      "totalInquiries": 1,
+      "totalCustomers": 1,
+      "totalReports": 0,
+      "sizeKb": 1,
+      "checksum": "sha256-c1ecc6660844",
+      "autoScheduled": false,
+      "createdAt": "2026-09-07T08:20:27.0122792+07:00"
+    }
+  ],
+  "securityLogs": [
+    {
+      "id": "6a9e750ae16190e1e8e57231",
+      "eventType": "inquiry_status_updated",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-511 diubah statusnya menjadi done",
+      "severity": "info",
+      "timestamp": "2026-09-07T15:25:46.3634796+07:00"
+    },
+    {
+      "id": "6a9e74d4e16190e1e8e57230",
+      "eventType": "inquiry_status_updated",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-511 diubah statusnya menjadi done",
+      "severity": "info",
+      "timestamp": "2026-09-07T15:24:52.4632014+07:00"
+    },
+    {
+      "id": "6a9e74cde16190e1e8e5722f",
+      "eventType": "inquiry_status_updated",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-511 diubah statusnya menjadi processing",
+      "severity": "info",
+      "timestamp": "2026-09-07T15:24:45.0694307+07:00"
+    },
+    {
+      "id": "6a9e7474e16190e1e8e5722e",
+      "eventType": "inquiry_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-300 (new) dibuat oleh Gino Putra Widana (628111919204). Stok 'Kayu Gaharu (Agarwood)' berhasil diamankan secara atomik. Sisa: 1 slab (1.0 m³).",
+      "severity": "info",
+      "timestamp": "2026-09-07T15:23:16.2330293+07:00"
+    },
+    {
+      "id": "6a9e5e09b6d5923f59f548b0",
+      "eventType": "inquiry_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-100 (pre_order) dibuat oleh Sultan Andara (6281987654321). Stok fisik 'Kayu Eboni Makassar' tidak mencukupi (Tersedia: 0 slab). Pesanan dialihkan ke status Inden/Pre-Order.",
+      "severity": "info",
+      "timestamp": "2026-09-07T13:47:37.4545101+07:00"
+    },
+    {
+      "id": "6a9e5ddbb6d5923f59f548ad",
+      "eventType": "inquiry_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-400 (new) dibuat oleh Budi Hartono (6281234567890). Stok 'Kayu Jati (Teak Wood)' berhasil diamankan secara atomik. Sisa: 11 slab (18.0 m³).",
+      "severity": "info",
+      "timestamp": "2026-09-07T13:46:51.3762724+07:00"
+    },
+    {
+      "id": "6a9e1766b25db2cc92a0d474",
+      "eventType": "backup_snapshot_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Snapshot kayu-nusantara-backup-2026-09-07-084614.json berhasil diarsipkan (MongoDB Atlas M0 Free Tier).",
+      "severity": "info",
+      "timestamp": "2026-09-07T08:46:14.542686+07:00"
+    },
+    {
+      "id": "6a9e115bb25db2cc92a0d472",
+      "eventType": "backup_snapshot_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Snapshot kayu-nusantara-backup-2026-09-07-082027.json berhasil diarsipkan (MongoDB Atlas M0 Free Tier).",
+      "severity": "info",
+      "timestamp": "2026-09-07T08:20:27.0122792+07:00"
+    },
+    {
+      "id": "6a9e1154b25db2cc92a0d470",
+      "eventType": "inquiry_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-000 dibuat oleh Budi Hartono (6281298765432). Repeat: true",
+      "severity": "info",
+      "timestamp": "2026-09-07T08:20:20.479799+07:00"
+    },
+    {
+      "id": "6a9e0d9cb237d405f721297b",
+      "eventType": "inquiry_status_updated",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-700 diubah statusnya menjadi processing",
+      "severity": "info",
+      "timestamp": "2026-09-07T08:04:28.758209+07:00"
+    },
+    {
+      "id": "6a9e0d97b237d405f721297a",
+      "eventType": "inquiry_created",
+      "ipOrSource": "127.0.0.1",
+      "details": "Pesanan INQ-20260907-700 dibuat oleh Budi Hartono (6281298765432). Repeat: true",
+      "severity": "info",
+      "timestamp": "2026-09-07T08:04:23.6751587+07:00"
+    }
+  ],
+  "stockLedgers": null,
+  "cashLedgers": null
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Kayu Nusantara - Pengadaan & Custom Furniture Kayu",
+  "description": "Platform pengadaan kayu premium (Jati, Eboni, Sonokeling, Gaharu) dan custom furniture dengan pemesanan WhatsApp otomatis, visualisasi 3D interaktif, arsitektur Golang/MongoDB, serta monitoring real-time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

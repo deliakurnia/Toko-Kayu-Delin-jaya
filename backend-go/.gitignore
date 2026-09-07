@@ -1,0 +1,18 @@
+# Compiled Binaries & Executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+kayu-nusantara-backend
+kayu-nusantara-backend.exe
+kayu-nusantara-backend.exe~
+
+# Environment Secrets & Private Configs
+.env
+.env.*
+!.env.example
+
+# Dynamic Uploaded Assets
+uploads/*
+!uploads/.gitkeep
